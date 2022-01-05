@@ -23,7 +23,6 @@ public class BaseEnvironment {
     public BaseEnvironment(ScheduleManager scheduleManager, ResourceManager portResourceManager, DebugLevel debugLevel) {
         this.scheduleManager = scheduleManager;
         this.portResourceManager = portResourceManager;
-        this.portResourceManager.initResource();
         this.debugLevel = debugLevel;
     }
     ////////////////////////////////////////////////////////////

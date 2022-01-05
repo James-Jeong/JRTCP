@@ -20,9 +20,16 @@ public class RtcpHeader {
     // VARIABLES
     public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc))
 
-    private int v; // version
-    private int p; // padding
-    private int rc; // the number of reception report blocks contained in this packet
+    // Version
+    private int v;
+
+    // Padding
+    private int p;
+
+    // The number of reception report blocks contained in this packet
+    private int rc;
+
+    // The packet type
     /**
      * 200 = SR Sender Report packet
      * 201 = RR Receiver Report packet
@@ -30,9 +37,13 @@ public class RtcpHeader {
      * 203 = BYE Goodbye packet
      * 204 = APP Application-defined packet
      */
-    private int pt; // the packet type
-    private int l; // the length of rtcp packet including the header and any padding
-    private long ssrc; // the synchronization source identifier
+    private int pt;
+
+    // The length of rtcp packet including the header and any padding
+    private int l;
+
+    // The synchronization source identifier
+    private long ssrc;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
@@ -92,7 +103,7 @@ public class RtcpHeader {
     }
 
     public byte[] getByteData() {
-        byte[] data = new byte[8];
+        byte[] data = new byte[LENGTH];
         int index = 0;
 
         // V, P, RC
