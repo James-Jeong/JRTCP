@@ -60,7 +60,8 @@ public class RtcpSenderReport {
     // in wall clock time when this report was sent.
     // In combination with timestamps returned in reception reports from the respective receivers,
     // it can be used to estimate the round-trip propagation time to and from the receivers.
-    private long nts; // Ntp TimeStamp (64 bits)
+    private long mswNts; // Most Significant Word Ntp TimeStamp (32 bits)
+    private long lswNts; // Least Significant Word Ntp TimeStamp (32 bits)
 
     // The RTP timestamp resembles the same time as the NTP timestamp (above),
     // but is measured in the same units and with the same random offset
@@ -68,7 +69,7 @@ public class RtcpSenderReport {
     // This correspondence may be used for intra- and inter-media synchronisation
     // for sources whose NTP timestamps are synchronised,
     // and may be used by media-independent receivers to estimate the nominal RTP clock frequency.
-    private int rts; // Rtp TimeStamp (32 bits)
+    private long rts; // Rtp TimeStamp (32 bits)
 
     // The sender's packet count totals up the number of RTP data packets
     // transmitted by the sender since joining the RTP session.
@@ -76,12 +77,12 @@ public class RtcpSenderReport {
     // The total number of RTP data packets transmitted by the sender
     // since starting transmission up until the time this SR packet was generated.
     // The count is reset if the sender changes its SSRC identifier.
-    private int spc; // Sender Packet Count total (32 bits)
+    private long spc; // Sender Packet Count total (32 bits)
 
     // The total number of payload octets (i.e., not including the header or any padding)
     // transmitted in RTP data packets by the sender since starting up transmission.
     // This field can be used to estimate the average payload data rate.
-    private int soc; // Sender Octet Count total (32 bits)
+    private long soc; // Sender Octet Count total (32 bits)
 
     // Report Block List
     private List<ReportBlock> reportBlockList;
@@ -92,12 +93,15 @@ public class RtcpSenderReport {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpSenderReport(RtcpHeader rtcpHeader, long nts, int rts, int spc, int soc, List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
+    public RtcpSenderReport(RtcpHeader rtcpHeader,
+                            long mswNts, long lswNts, long rts, long spc, long soc,
+                            List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
         this.rtcpHeader = rtcpHeader;
-        this.nts = nts;
-        this.rts = rts;
-        this.spc = spc;
-        this.soc = soc;
+        this.mswNts = (int) mswNts;
+        this.lswNts = (int) lswNts;
+        this.rts = (int) rts;
+        this.spc = (int) spc;
+        this.soc = (int) soc;
         this.reportBlockList = reportBlockList;
         this.profileSpecificExtensions = profileSpecificExtensions;
     }
@@ -107,7 +111,7 @@ public class RtcpSenderReport {
     public RtcpSenderReport(byte[] data) {
         int index = 0;
         int dataLength = data.length;
-        if (dataLength <= MIN_LENGTH) {
+        if (dataLength >= MIN_LENGTH) {
             reportBlockList = null;
 
             // HEADER
@@ -117,50 +121,66 @@ public class RtcpSenderReport {
             index += RtcpHeader.LENGTH;
 
             // NTS > TimeStamp.getCurrentTime().getTime()
-            byte[] ntsData = new byte[8];
-            System.arraycopy(data, index, ntsData, 0, ByteUtil.NUM_BYTES_IN_LONG);
-            nts = ByteUtil.bytesToLong(ntsData, true);
-            index += ByteUtil.NUM_BYTES_IN_LONG;
+            byte[] mswNtsData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(data, index, mswNtsData, 0, ByteUtil.NUM_BYTES_IN_INT);
+            byte[] mswNtsData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(mswNtsData, 0, mswNtsData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            mswNts = ByteUtil.bytesToLong(mswNtsData2, true);
+            index += ByteUtil.NUM_BYTES_IN_INT;
+
+            byte[] lswNtsData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(data, index, lswNtsData, 0, ByteUtil.NUM_BYTES_IN_INT);
+            byte[] lswNtsData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(lswNtsData, 0, lswNtsData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            lswNts = ByteUtil.bytesToLong(lswNtsData2, true);
+            index += ByteUtil.NUM_BYTES_IN_INT;
 
             // RTS > RtpPacket.getTimeStamp()
-            byte[] rtsData = new byte[4];
+            byte[] rtsData = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(data, index, rtsData, 0, ByteUtil.NUM_BYTES_IN_INT);
-            rts = ByteUtil.bytesToInt(rtsData, true);
+            byte[] rtsData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(rtsData, 0, rtsData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            rts = ByteUtil.bytesToLong(rtsData2, true);
             index += ByteUtil.NUM_BYTES_IN_INT;
 
             // SPC > Get by Network Statistics
-            byte[] spcData = new byte[4];
+            byte[] spcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(data, index, spcData, 0, ByteUtil.NUM_BYTES_IN_INT);
-            spc = ByteUtil.bytesToInt(spcData, true);
+            byte[] spcData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(spcData, 0, spcData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            spc = ByteUtil.bytesToLong(spcData2, true);
             index += ByteUtil.NUM_BYTES_IN_INT;
 
             // SOC > Get by Network Statistics
-            byte[] socData = new byte[4];
+            byte[] socData = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(data, index, socData, 0, ByteUtil.NUM_BYTES_IN_INT);
-            soc = ByteUtil.bytesToInt(socData, true);
-        }
+            byte[] socData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(socData, 0, socData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            soc = ByteUtil.bytesToLong(socData2, true);
+            index += ByteUtil.NUM_BYTES_IN_INT;
 
-        if (dataLength > MIN_LENGTH) {
-            reportBlockList = new ArrayList<>();
+            if (dataLength > MIN_LENGTH) {
+                reportBlockList = new ArrayList<>();
 
-            // ReportBlock
-            int curBlockIndex = index;
-            while (curBlockIndex < dataLength) {
-                if (dataLength - curBlockIndex < ReportBlock.LENGTH) { break; }
+                // ReportBlock
+                int curBlockIndex = index;
+                while (curBlockIndex < dataLength) {
+                    if (dataLength - curBlockIndex < ReportBlock.LENGTH) { break; }
 
-                byte[] curBlockData = new byte[ReportBlock.LENGTH];
-                System.arraycopy(data, curBlockIndex, curBlockData, 0, ReportBlock.LENGTH);
-                ReportBlock rtcpReceiverReportBlock = new ReportBlock(curBlockData);
-                reportBlockList.add(rtcpReceiverReportBlock);
-                curBlockIndex += ReportBlock.LENGTH;
-            }
+                    byte[] curBlockData = new byte[ReportBlock.LENGTH];
+                    System.arraycopy(data, curBlockIndex, curBlockData, 0, ReportBlock.LENGTH);
+                    ReportBlock rtcpReceiverReportBlock = new ReportBlock(curBlockData);
+                    reportBlockList.add(rtcpReceiverReportBlock);
+                    curBlockIndex += ReportBlock.LENGTH;
+                }
 
-            // Profile Specific Extensions
-            index = curBlockIndex;
-            int remainLength = dataLength - index;
-            if (remainLength > 0) {
-                profileSpecificExtensions = new byte[remainLength];
-                System.arraycopy(data, index, profileSpecificExtensions, 0, remainLength);
+                // Profile Specific Extensions
+                index = curBlockIndex;
+                int remainLength = dataLength - index;
+                if (remainLength > 0) {
+                    profileSpecificExtensions = new byte[remainLength];
+                    System.arraycopy(data, index, profileSpecificExtensions, 0, remainLength);
+                }
             }
         }
     }
@@ -178,42 +198,62 @@ public class RtcpSenderReport {
         index += headerData.length;
 
         // NTS
-        byte[] ntsData = ByteUtil.longToBytes(nts, true);
+        byte[] ntsData = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+        byte[] mswNtsData = ByteUtil.intToBytes((int) mswNts, true);
+        System.arraycopy(mswNtsData, 0, ntsData, 0, mswNtsData.length);
+        byte[] lswNtsData = ByteUtil.intToBytes((int) lswNts, true);
+        System.arraycopy(lswNtsData, 0, ntsData, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
         System.arraycopy(ntsData, 0, data, index, ntsData.length);
         index += ntsData.length;
 
         // RTS
-        byte[] rtsData = ByteUtil.intToBytes(rts, true);
+        byte[] rtsData = ByteUtil.intToBytes((int) rts, true);
         System.arraycopy(rtsData, 0, data, index, rtsData.length);
         index += rtsData.length;
 
         // SPC
-        byte[] spcData = ByteUtil.intToBytes(spc, true);
+        byte[] spcData = ByteUtil.intToBytes((int) spc, true);
         System.arraycopy(spcData, 0, data, index, spcData.length);
         index += spcData.length;
 
         // SOC
-        byte[] socData = ByteUtil.intToBytes(soc, true);
+        byte[] socData = ByteUtil.intToBytes((int) soc, true);
         System.arraycopy(socData, 0, data, index, socData.length);
+        index += socData.length;
 
-        for (ReportBlock rtcpReceiverReportBlock : reportBlockList) {
-            if (rtcpReceiverReportBlock == null) { continue; }
+        // Report Block
+        if (!reportBlockList.isEmpty()) {
+            byte[] newData = new byte[data.length + (reportBlockList.size() * ReportBlock.LENGTH)];
+            System.arraycopy(data, 0, newData, 0, data.length);
+            data = newData;
 
-            byte[] curReportBlockData = rtcpReceiverReportBlock.getByteData();
-            System.arraycopy(curReportBlockData, 0, data, index, curReportBlockData.length);
-            index += curReportBlockData.length;
+            for (ReportBlock rtcpReceiverReportBlock : reportBlockList) {
+                if (rtcpReceiverReportBlock == null) { continue; }
+
+                byte[] curReportBlockData = rtcpReceiverReportBlock.getByteData();
+                System.arraycopy(curReportBlockData, 0, data, index, curReportBlockData.length);
+                index += curReportBlockData.length;
+            }
         }
 
+        // Profile Specific Extenstions
         if (profileSpecificExtensions != null && profileSpecificExtensions.length > 0) {
+            byte[] newData = new byte[data.length + profileSpecificExtensions.length];
+            System.arraycopy(data, 0, newData, 0, data.length);
+            data = newData;
+
             System.arraycopy(profileSpecificExtensions, 0, data, index, profileSpecificExtensions.length);
         }
 
         return data;
     }
 
-    public void setData(RtcpHeader rtcpHeader, long nts, int rts, int spc, int soc, List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
+    public void setData(RtcpHeader rtcpHeader,
+                        long mswNts, long lswNts, long rts, long spc, long soc,
+                        List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
         this.rtcpHeader = rtcpHeader;
-        this.nts = nts;
+        this.mswNts = mswNts;
+        this.lswNts = lswNts;
         this.rts = rts;
         this.spc = spc;
         this.soc = soc;
@@ -229,32 +269,44 @@ public class RtcpSenderReport {
         this.rtcpHeader = rtcpHeader;
     }
 
-    public long getNts() {
-        return nts;
+    public long getMswNts() {
+        return mswNts;
     }
 
-    public void setNts(long nts) {
-        this.nts = nts;
+    public void setMswNts(long mswNts) {
+        this.mswNts = mswNts;
     }
 
-    public int getRts() {
+    public long getLswNts() {
+        return lswNts;
+    }
+
+    public void setLswNts(long lswNts) {
+        this.lswNts = lswNts;
+    }
+
+    public long getRts() {
         return rts;
     }
 
-    public void setRts(int rts) {
+    public void setRts(long rts) {
         this.rts = rts;
     }
 
-    public int getSpc() {
+    public long getSpc() {
         return spc;
     }
 
-    public void setSpc(int spc) {
+    public void setSpc(long spc) {
         this.spc = spc;
     }
 
-    public int getSoc() {
+    public long getSoc() {
         return soc;
+    }
+
+    public void setSoc(long soc) {
+        this.soc = soc;
     }
 
     public void setSoc(int soc) {

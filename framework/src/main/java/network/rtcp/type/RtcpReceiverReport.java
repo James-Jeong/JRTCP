@@ -102,23 +102,35 @@ public class RtcpReceiverReport {
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
-    public byte[] getByteData() {
-        byte[] data = new byte[MIN_LENGTH + (reportBlockList.size() * ReportBlock.LENGTH) + profileSpecificExtensions.length];
+    public byte[] getData() {
+        byte[] data = new byte[MIN_LENGTH];
         int index = 0;
 
         byte[] headerData = rtcpHeader.getData();
         System.arraycopy(headerData, 0, data, index, headerData.length);
         index += headerData.length;
 
-        for (ReportBlock rtcpReceiverReportBlock : reportBlockList) {
-            if (rtcpReceiverReportBlock == null) { continue; }
+        if (!reportBlockList.isEmpty()) {
+            byte[] newData = new byte[data.length + (reportBlockList.size() * ReportBlock.LENGTH)];
+            System.arraycopy(data, 0, newData, 0, data.length);
+            data = newData;
 
-            byte[] curReportBlockData = rtcpReceiverReportBlock.getByteData();
-            System.arraycopy(curReportBlockData, 0, data, index, curReportBlockData.length);
-            index += curReportBlockData.length;
+            for (ReportBlock rtcpReceiverReportBlock : reportBlockList) {
+                if (rtcpReceiverReportBlock == null) {
+                    continue;
+                }
+
+                byte[] curReportBlockData = rtcpReceiverReportBlock.getByteData();
+                System.arraycopy(curReportBlockData, 0, data, index, curReportBlockData.length);
+                index += curReportBlockData.length;
+            }
         }
 
         if (profileSpecificExtensions != null && profileSpecificExtensions.length > 0) {
+            byte[] newData = new byte[data.length + profileSpecificExtensions.length];
+            System.arraycopy(data, 0, newData, 0, data.length);
+            data = newData;
+
             System.arraycopy(profileSpecificExtensions, 0, data, index, profileSpecificExtensions.length);
         }
 

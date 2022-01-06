@@ -18,7 +18,8 @@ public class RtcpHeader {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc))
+    public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc, unsigned int))
+    // (unsigned integer 변수들 때문에 크게 잡음 (오버플로우 방지하기 위함))
 
     // Version
     // Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
@@ -47,25 +48,25 @@ public class RtcpHeader {
      * 203 = BYE Goodbye packet
      * 204 = APP Application-defined packet
      */
-    private int pt; // (8 bits)
+    private short pt; // (8 bits)
 
     // The length of this RTCP packet in 32-bit words minus one,
     // including the header and any padding.
     private int l; // (16 bits)
 
     // The synchronization source identifier for the originator of this SR packet.
-    private int ssrc; // (32 bits)
+    private long ssrc; // (32 bits)
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpHeader(int v, int p, int rc, int pt, int l, int ssrc) {
+    public RtcpHeader(int v, int p, int rc, short pt, int l, long ssrc) {
         this.v = v;
         this.p = p;
         this.rc = rc;
         this.pt = pt;
         this.l = l;
-        this.ssrc = ssrc;
+        this.ssrc = (int) ssrc;
     }
 
     public RtcpHeader() {}
@@ -77,27 +78,33 @@ public class RtcpHeader {
             // V, P, RC
             byte[] vprcData = new byte[1];
             System.arraycopy(data, index, vprcData, 0, 1);
-            v = vprcData[0] & 0x11000000;
-            p = vprcData[0] & 0x00100000;
-            rc = vprcData[0] & 0x00011111;
+            v = (vprcData[0] >>> 0x06) & 0x03;
+            p = (vprcData[0] >>> 0x05) & 0x01;
+            rc = vprcData[0] & 0x05;
             index += 1;
 
             // PT
             byte[] ptData = new byte[1];
             System.arraycopy(data, index, ptData, 0, 1);
-            pt = ptData[0];
+            byte[] ptData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(ptData, 0, ptData2, 1, 1);
+            pt = ByteUtil.bytesToShort(ptData2, true);
             index += 1;
 
             // LENGTH
-            byte[] lengthData = new byte[2];
+            byte[] lengthData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
             System.arraycopy(data, index, lengthData, 0, 2);
-            l = ByteUtil.bytesToInt(lengthData, true);
+            byte[] lengthData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(lengthData, 0, lengthData2, ByteUtil.NUM_BYTES_IN_SHORT, ByteUtil.NUM_BYTES_IN_SHORT);
+            l = ByteUtil.bytesToInt(lengthData2, true);
             index += 2;
 
             // SSRC
-            byte[] ssrcData = new byte[4];
-            System.arraycopy(data, index, ssrcData, 0, 4);
-            ssrc = ByteUtil.bytesToInt(ssrcData, true);
+            byte[] ssrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(data, index, ssrcData, 0, ByteUtil.NUM_BYTES_IN_INT);
+            byte[] ssrcData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(ssrcData, 0, ssrcData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            ssrc = ByteUtil.bytesToLong(ssrcData2, true);
         }
     }
     ////////////////////////////////////////////////////////////
@@ -109,39 +116,41 @@ public class RtcpHeader {
         int index = 0;
 
         // V, P, RC
-        byte vprc = (byte) ((byte) v & 0x11000000);
-        byte pByte = (byte) ((byte) p & 0x00100000);
-        vprc |= pByte;
-        byte rcByte = (byte) ((byte) rc & 0x00011111);
-        vprc |= rcByte;
+        byte vprc = 0;
+        vprc |= v;
+        vprc <<= 0x01;
+        vprc |= p;
+        vprc <<= 0x05;
+        vprc |= rc;
         byte[] vprcData = { vprc };
         System.arraycopy(vprcData, 0, data, index, 1);
         index += 1;
 
         // PT
-        byte[] ptData = { (byte) pt };
-        System.arraycopy(ptData, 0, data, index, 1);
+        byte[] ptData = ByteUtil.shortToBytes(pt, true);
+        byte[] ptData2 = { ptData[1] };
+        System.arraycopy(ptData2, 0, data, index, ptData2.length);
         index += 1;
 
         // LENGTH
         byte[] lengthData = ByteUtil.shortToBytes((short) l, true);
-        System.arraycopy(lengthData, 0, data, index, 2);
+        System.arraycopy(lengthData, 0, data, index, lengthData.length);
         index += 2;
 
         // SSRC
         byte[] ssrcData = ByteUtil.intToBytes((int) ssrc, true);
-        System.arraycopy(ssrcData, 0, data, index, 2);
+        System.arraycopy(ssrcData, 0, data, index, ssrcData.length);
 
         return data;
     }
 
-    public void setData(int v, int p, int rc, int pt, int l, int ssrc) {
+    public void setData(int v, int p, int rc, short pt, int l, long ssrc) {
         this.v = v;
         this.p = p;
         this.rc = rc;
         this.pt = pt;
         this.l = l;
-        this.ssrc = ssrc;
+        this.ssrc = (int) ssrc;
     }
 
     public int getV() {
@@ -172,7 +181,7 @@ public class RtcpHeader {
         return pt;
     }
 
-    public void setPt(int pt) {
+    public void setPt(short pt) {
         this.pt = pt;
     }
 
@@ -188,7 +197,7 @@ public class RtcpHeader {
         return ssrc;
     }
 
-    public void setSsrc(int ssrc) {
+    public void setSsrc(long ssrc) {
         this.ssrc = ssrc;
     }
 
