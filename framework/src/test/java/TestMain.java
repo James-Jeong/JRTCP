@@ -25,6 +25,9 @@ public class TestMain {
 
         RtcpSourceDescriptionTest rtcpSourceDescriptionTest = new RtcpSourceDescriptionTest();
         rtcpSourceDescriptionTest.test();
+
+        RtcpByeTest rtcpByeTest = new RtcpByeTest();
+        rtcpByeTest.test();
     }
 
 }

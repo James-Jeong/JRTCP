@@ -24,7 +24,7 @@ public class RtcpHeader {
     // VERSION
     // Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
     // The version defined by this specification is two (2).
-    private int v = 0; // (2 bits)
+    private int version = 0; // (2 bits)
 
     // PADDING
     // If the padding bit is set, this RTCP packet contains some additional padding octets
@@ -33,12 +33,12 @@ public class RtcpHeader {
     // Padding may be needed by some encryption algorithms with fixed block sizes.
     // In a compound RTCP packet, padding should only be required on
     // the last individual packet because the compound packet is encrypted as a whole.
-    private int p = 0; // (1 bit)
+    private int padding = 0; // (1 bit)
 
     // 1) The number of reception report blocks contained in this packet.
     //      A value of zero is valid.
     // 2) The number of SSRC/CSRC chunks contained in this SDES packet.
-    private int rc = 0; // (5 bits)
+    private int resourceCount = 0; // (5 bits)
 
     // PACKET TYPE
     // Contains the constant 200 to identify this as an RTCP SR packet.
@@ -49,12 +49,12 @@ public class RtcpHeader {
      * 203 = BYE Goodbye packet
      * 204 = APP Application-defined packet
      */
-    private short pt = 0; // (8 bits)
+    private short packetType = 0; // (8 bits)
 
     // LENGTH
     // The length of this RTCP packet in 32-bit words minus one,
     // including the header and any padding.
-    private int l = 0; // (16 bits)
+    private int length = 0; // (16 bits) TODO > HOW TO CALCULATE BYTE
 
     // SSRC
     // The synchronization source identifier for the originator of this SR packet.
@@ -63,12 +63,12 @@ public class RtcpHeader {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpHeader(int v, int p, int rc, short pt, int l, long ssrc) {
-        this.v = v;
-        this.p = p;
-        this.rc = rc;
-        this.pt = pt;
-        this.l = l;
+    public RtcpHeader(int version, int padding, int resourceCount, short packetType, int length, long ssrc) {
+        this.version = version;
+        this.padding = padding;
+        this.resourceCount = resourceCount;
+        this.packetType = packetType;
+        this.length = length;
         this.ssrc = (int) ssrc;
     }
 
@@ -81,9 +81,9 @@ public class RtcpHeader {
             // V, P, RC
             byte[] vprcData = new byte[1];
             System.arraycopy(data, index, vprcData, 0, 1);
-            v = (vprcData[0] >>> 0x06) & 0x03;
-            p = (vprcData[0] >>> 0x05) & 0x01;
-            rc = vprcData[0] & 0x05;
+            version = (vprcData[0] >>> 0x06) & 0x03;
+            padding = (vprcData[0] >>> 0x05) & 0x01;
+            resourceCount = vprcData[0] & 0x05;
             index += 1;
 
             // PT
@@ -91,7 +91,7 @@ public class RtcpHeader {
             System.arraycopy(data, index, ptData, 0, 1);
             byte[] ptData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
             System.arraycopy(ptData, 0, ptData2, 1, 1);
-            pt = ByteUtil.bytesToShort(ptData2, true);
+            packetType = ByteUtil.bytesToShort(ptData2, true);
             index += 1;
 
             // LENGTH
@@ -99,7 +99,7 @@ public class RtcpHeader {
             System.arraycopy(data, index, lengthData, 0, 2);
             byte[] lengthData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(lengthData, 0, lengthData2, ByteUtil.NUM_BYTES_IN_SHORT, ByteUtil.NUM_BYTES_IN_SHORT);
-            l = ByteUtil.bytesToInt(lengthData2, true);
+            length = ByteUtil.bytesToInt(lengthData2, true);
             index += ByteUtil.NUM_BYTES_IN_SHORT;
 
             // SSRC
@@ -120,23 +120,23 @@ public class RtcpHeader {
 
         // V, P, RC
         byte vprc = 0;
-        vprc |= v;
+        vprc |= version;
         vprc <<= 0x01;
-        vprc |= p;
+        vprc |= padding;
         vprc <<= 0x05;
-        vprc |= rc;
+        vprc |= resourceCount;
         byte[] vprcData = { vprc };
         System.arraycopy(vprcData, 0, data, index, 1);
         index += 1;
 
         // PT
-        byte[] ptData = ByteUtil.shortToBytes(pt, true);
+        byte[] ptData = ByteUtil.shortToBytes(packetType, true);
         byte[] ptData2 = { ptData[1] };
         System.arraycopy(ptData2, 0, data, index, ptData2.length);
         index += 1;
 
         // LENGTH
-        byte[] lengthData = ByteUtil.shortToBytes((short) l, true);
+        byte[] lengthData = ByteUtil.shortToBytes((short) length, true);
         System.arraycopy(lengthData, 0, data, index, lengthData.length);
         index += 2;
 
@@ -147,53 +147,53 @@ public class RtcpHeader {
         return data;
     }
 
-    public void setData(int v, int p, int rc, short pt, int l, long ssrc) {
-        this.v = v;
-        this.p = p;
-        this.rc = rc;
-        this.pt = pt;
-        this.l = l;
+    public void setData(int version, int padding, int resourceCount, short packetType, int length, long ssrc) {
+        this.version = version;
+        this.padding = padding;
+        this.resourceCount = resourceCount;
+        this.packetType = packetType;
+        this.length = length;
         this.ssrc = (int) ssrc;
     }
 
-    public int getV() {
-        return v;
+    public int getVersion() {
+        return version;
     }
 
-    public void setV(int v) {
-        this.v = v;
+    public void setVersion(int version) {
+        this.version = version;
     }
 
-    public int getP() {
-        return p;
+    public int getPadding() {
+        return padding;
     }
 
-    public void setP(int p) {
-        this.p = p;
+    public void setPadding(int padding) {
+        this.padding = padding;
     }
 
-    public int getRc() {
-        return rc;
+    public int getResourceCount() {
+        return resourceCount;
     }
 
-    public void setRc(int rc) {
-        this.rc = rc;
+    public void setResourceCount(int resourceCount) {
+        this.resourceCount = resourceCount;
     }
 
-    public int getPt() {
-        return pt;
+    public int getPacketType() {
+        return packetType;
     }
 
-    public void setPt(short pt) {
-        this.pt = pt;
+    public void setPacketType(short packetType) {
+        this.packetType = packetType;
     }
 
-    public int getL() {
-        return l;
+    public int getLength() {
+        return length;
     }
 
-    public void setL(int l) {
-        this.l = l;
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public long getSsrc() {

@@ -80,7 +80,7 @@ public class RtcpReportBlock {
     // CONSTRUCTOR
     public RtcpReportBlock(long ssrc, short f, int c, long ehsn, long j, long lsr, long dlsr) {
         this.ssrc = (int) ssrc;
-        this.f = f;
+        this.f = (byte) f;
         this.c = c;
         this.ehsn = (int) ehsn;
         this.j = (int) j;

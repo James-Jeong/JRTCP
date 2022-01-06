@@ -25,7 +25,7 @@ public class SdesChunk {
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
     public SdesChunk(long ssrc, List<SdesItem> sdesItemList) {
-        this.ssrc = ssrc;
+        this.ssrc = (int) ssrc;
         this.sdesItemList = sdesItemList;
     }
 

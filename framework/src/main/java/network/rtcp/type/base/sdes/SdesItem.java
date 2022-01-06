@@ -19,6 +19,7 @@ public class SdesItem {
     ////////////////////////////////////////////////////////////
     // VARIABLES
     public static final int MIN_LENGTH = 2; // bytes
+    public static final int LIMIT_TEXT_LENGTH = 255; // bytes
 
     // TYPE
     private SdesType sdesType = SdesType.UNKNOWN; // (8 bits)
@@ -40,7 +41,7 @@ public class SdesItem {
     // CONSTRUCTOR
     public SdesItem(SdesType sdesType, int length, String text) {
         this.sdesType = sdesType;
-        this.length = length;
+        this.length = (short) length;
         this.text = text;
     }
 
@@ -66,6 +67,10 @@ public class SdesItem {
             // TEXT
             int textLength = data.length - MIN_LENGTH;
             if (textLength > 0) {
+                if (textLength > LIMIT_TEXT_LENGTH) {
+                    textLength = LIMIT_TEXT_LENGTH;
+                }
+
                 byte[] textData = new byte[textLength];
                 System.arraycopy(data, index, textData, 0, textLength);
                 text = new String(textData, StandardCharsets.UTF_8);

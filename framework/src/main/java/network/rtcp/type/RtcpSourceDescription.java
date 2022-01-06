@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.type.base.sdes.SdesChunk;
-import network.rtcp.type.base.sdes.SdesItem;
-import util.module.ByteUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +37,13 @@ public class RtcpSourceDescription {
     ////////////////////////////////////////////////////////////
     // VARIABLES
     public static final int MIN_LENGTH = RtcpHeader.LENGTH; // bytes
+    public static final int CHUNK_LIMIT = 31; // bytes (2^5 - 1, 5 is the bits of resource count of header)
 
     // RTCP HEADER
     private RtcpHeader rtcpHeader = null;
 
     // SDES CHUNK LIST
-    private List<SdesChunk> sdesChunkList = null; // Limit 31 chunks (source count is 5 bits limit. Thus 31 is limit number.)
+    private List<SdesChunk> sdesChunkList = null; // Limit 31 chunks
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
@@ -66,9 +65,9 @@ public class RtcpSourceDescription {
             rtcpHeader = new RtcpHeader(headerData);
             index += RtcpHeader.LENGTH;
 
-            int limitChunkSize = rtcpHeader.getRc();
-            if (limitChunkSize > 31) {
-                sdesChunkList = new ArrayList<>(31);
+            int limitChunkSize = rtcpHeader.getResourceCount();
+            if (limitChunkSize > CHUNK_LIMIT) {
+                sdesChunkList = new ArrayList<>(CHUNK_LIMIT);
             } else {
                 sdesChunkList = new ArrayList<>(limitChunkSize);
             }
