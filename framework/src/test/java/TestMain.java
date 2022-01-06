@@ -1,4 +1,5 @@
 import network.NetworkTest;
+import network.rtcp.type.RtcpApplicationDefined;
 import network.rtcp.type.RtcpSourceDescription;
 import network.rtcp.type.base.sdes.SdesItem;
 import org.junit.Test;
@@ -28,6 +29,9 @@ public class TestMain {
 
         RtcpByeTest rtcpByeTest = new RtcpByeTest();
         rtcpByeTest.test();
+
+        RtcpApplicationDefinedTest rtcpApplicationDefinedTest = new RtcpApplicationDefinedTest();
+        rtcpApplicationDefinedTest.test();
     }
 
 }
