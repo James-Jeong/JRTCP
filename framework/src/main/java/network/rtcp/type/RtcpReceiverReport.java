@@ -2,7 +2,7 @@ package network.rtcp.type;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.type.base.ReportBlock;
+import network.rtcp.type.base.RtcpReportBlock;
 import network.rtcp.base.RtcpHeader;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public class RtcpReceiverReport {
     public static final int MIN_LENGTH = RtcpHeader.LENGTH; // bytes
 
     // RTCP HEADER
-    private RtcpHeader rtcpHeader;
+    private RtcpHeader rtcpHeader = null;
 
     // Report Block List
-    private List<ReportBlock> reportBlockList;
+    private List<RtcpReportBlock> rtcpReportBlockList;
 
     // Profile-specific extensions
     private byte[] profileSpecificExtensions;
@@ -55,9 +55,9 @@ public class RtcpReceiverReport {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpReceiverReport(RtcpHeader rtcpHeader, List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
+    public RtcpReceiverReport(RtcpHeader rtcpHeader, List<RtcpReportBlock> rtcpReportBlockList, byte[] profileSpecificExtensions) {
         this.rtcpHeader = rtcpHeader;
-        this.reportBlockList = reportBlockList;
+        this.rtcpReportBlockList = rtcpReportBlockList;
         this.profileSpecificExtensions = profileSpecificExtensions;
     }
 
@@ -66,9 +66,9 @@ public class RtcpReceiverReport {
     public RtcpReceiverReport(byte[] data) {
         int dataLength = data.length;
         if (dataLength <= MIN_LENGTH) {
-            reportBlockList = null;
+            rtcpReportBlockList = null;
         } else {
-            reportBlockList = new ArrayList<>();
+            rtcpReportBlockList = new ArrayList<>();
             int index = 0;
 
             // HEADER
@@ -80,13 +80,13 @@ public class RtcpReceiverReport {
             // ReportBlock
             int curBlockIndex = index;
             while (curBlockIndex < dataLength) {
-                if (dataLength - curBlockIndex < ReportBlock.LENGTH) { break; }
+                if (dataLength - curBlockIndex < RtcpReportBlock.LENGTH) { break; }
 
-                byte[] curBlockData = new byte[ReportBlock.LENGTH];
-                System.arraycopy(data, curBlockIndex, curBlockData, 0, ReportBlock.LENGTH);
-                ReportBlock rtcpReceiverReportBlock = new ReportBlock(curBlockData);
-                reportBlockList.add(rtcpReceiverReportBlock);
-                curBlockIndex += ReportBlock.LENGTH;
+                byte[] curBlockData = new byte[RtcpReportBlock.LENGTH];
+                System.arraycopy(data, curBlockIndex, curBlockData, 0, RtcpReportBlock.LENGTH);
+                RtcpReportBlock rtcpReceiverRtcpReportBlock = new RtcpReportBlock(curBlockData);
+                rtcpReportBlockList.add(rtcpReceiverRtcpReportBlock);
+                curBlockIndex += RtcpReportBlock.LENGTH;
             }
 
             // Profile Specific Extensions
@@ -103,6 +103,10 @@ public class RtcpReceiverReport {
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
     public byte[] getData() {
+        if (rtcpHeader == null) {
+            return null;
+        }
+
         byte[] data = new byte[MIN_LENGTH];
         int index = 0;
 
@@ -110,17 +114,17 @@ public class RtcpReceiverReport {
         System.arraycopy(headerData, 0, data, index, headerData.length);
         index += headerData.length;
 
-        if (!reportBlockList.isEmpty()) {
-            byte[] newData = new byte[data.length + (reportBlockList.size() * ReportBlock.LENGTH)];
+        if (rtcpReportBlockList != null && !rtcpReportBlockList.isEmpty()) {
+            byte[] newData = new byte[data.length + (rtcpReportBlockList.size() * RtcpReportBlock.LENGTH)];
             System.arraycopy(data, 0, newData, 0, data.length);
             data = newData;
 
-            for (ReportBlock rtcpReceiverReportBlock : reportBlockList) {
-                if (rtcpReceiverReportBlock == null) {
+            for (RtcpReportBlock rtcpReceiverRtcpReportBlock : rtcpReportBlockList) {
+                if (rtcpReceiverRtcpReportBlock == null) {
                     continue;
                 }
 
-                byte[] curReportBlockData = rtcpReceiverReportBlock.getByteData();
+                byte[] curReportBlockData = rtcpReceiverRtcpReportBlock.getByteData();
                 System.arraycopy(curReportBlockData, 0, data, index, curReportBlockData.length);
                 index += curReportBlockData.length;
             }
@@ -137,9 +141,9 @@ public class RtcpReceiverReport {
         return  data;
     }
 
-    public void setData(RtcpHeader rtcpHeader, List<ReportBlock> reportBlockList, byte[] profileSpecificExtensions) {
+    public void setData(RtcpHeader rtcpHeader, List<RtcpReportBlock> rtcpReportBlockList, byte[] profileSpecificExtensions) {
         this.rtcpHeader = rtcpHeader;
-        this.reportBlockList = reportBlockList;
+        this.rtcpReportBlockList = rtcpReportBlockList;
         this.profileSpecificExtensions = profileSpecificExtensions;
     }
 
@@ -151,16 +155,17 @@ public class RtcpReceiverReport {
         this.rtcpHeader = rtcpHeader;
     }
 
-    public List<ReportBlock> getReportBlockList() {
-        return reportBlockList;
+    public List<RtcpReportBlock> getReportBlockList() {
+        return rtcpReportBlockList;
     }
 
-    public ReportBlock getReportBlockByIndex(int index) {
-        return reportBlockList.get(index);
+    public RtcpReportBlock getReportBlockByIndex(int index) {
+        if (rtcpReportBlockList == null || index < 0 || index >= rtcpReportBlockList.size()) { return null; }
+        return rtcpReportBlockList.get(index);
     }
 
-    public void setReportBlockList(List<ReportBlock> reportBlockList) {
-        this.reportBlockList = reportBlockList;
+    public void setReportBlockList(List<RtcpReportBlock> rtcpReportBlockList) {
+        this.rtcpReportBlockList = rtcpReportBlockList;
     }
 
     public byte[] getProfileSpecificExtensions() {

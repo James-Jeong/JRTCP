@@ -21,25 +21,26 @@ public class RtcpHeader {
     public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc, unsigned int))
     // (unsigned integer 변수들 때문에 크게 잡음 (오버플로우 방지하기 위함))
 
-    // Version
+    // VERSION
     // Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
     // The version defined by this specification is two (2).
-    private int v; // (2 bits)
+    private int v = 0; // (2 bits)
 
-    // Padding
+    // PADDING
     // If the padding bit is set, this RTCP packet contains some additional padding octets
     // at the end which are not part of the control information.
     // The last octet of the padding is a count of how many padding octets should be ignored.
     // Padding may be needed by some encryption algorithms with fixed block sizes.
     // In a compound RTCP packet, padding should only be required on
     // the last individual packet because the compound packet is encrypted as a whole.
-    private int p; // (1 bit)
+    private int p = 0; // (1 bit)
 
-    // The number of reception report blocks contained in this packet.
-    // A value of zero is valid.
-    private int rc; // (5 bits)
+    // 1) The number of reception report blocks contained in this packet.
+    //      A value of zero is valid.
+    // 2) The number of SSRC/CSRC chunks contained in this SDES packet.
+    private int rc = 0; // (5 bits)
 
-    // The packet type
+    // PACKET TYPE
     // Contains the constant 200 to identify this as an RTCP SR packet.
     /**
      * 200 = SR Sender Report packet
@@ -48,14 +49,16 @@ public class RtcpHeader {
      * 203 = BYE Goodbye packet
      * 204 = APP Application-defined packet
      */
-    private short pt; // (8 bits)
+    private short pt = 0; // (8 bits)
 
+    // LENGTH
     // The length of this RTCP packet in 32-bit words minus one,
     // including the header and any padding.
-    private int l; // (16 bits)
+    private int l = 0; // (16 bits)
 
+    // SSRC
     // The synchronization source identifier for the originator of this SR packet.
-    private long ssrc; // (32 bits)
+    private long ssrc = 0; // (32 bits)
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
@@ -97,7 +100,7 @@ public class RtcpHeader {
             byte[] lengthData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(lengthData, 0, lengthData2, ByteUtil.NUM_BYTES_IN_SHORT, ByteUtil.NUM_BYTES_IN_SHORT);
             l = ByteUtil.bytesToInt(lengthData2, true);
-            index += 2;
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
 
             // SSRC
             byte[] ssrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];

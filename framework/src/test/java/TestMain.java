@@ -1,9 +1,8 @@
 import network.NetworkTest;
+import network.rtcp.type.RtcpSourceDescription;
+import network.rtcp.type.base.sdes.SdesItem;
 import org.junit.Test;
-import rtcp.RtcpHeaderTest;
-import rtcp.RtcpReceiverReportTest;
-import rtcp.RtcpReportBlockTest;
-import rtcp.RtcpSenderReportTest;
+import rtcp.*;
 
 public class TestMain {
 
@@ -12,7 +11,7 @@ public class TestMain {
         //NetworkTest networkTest = new NetworkTest();
         //networkTest.test();
 
-        RtcpHeaderTest rtcpHeaderTest = new RtcpHeaderTest();
+        /*RtcpHeaderTest rtcpHeaderTest = new RtcpHeaderTest();
         rtcpHeaderTest.test();
 
         RtcpReportBlockTest rtcpReportBlockTest = new RtcpReportBlockTest();
@@ -22,7 +21,10 @@ public class TestMain {
         rtcpSenderReportTest.test();
 
         RtcpReceiverReportTest rtcpReceiverReportTest = new RtcpReceiverReportTest();
-        rtcpReceiverReportTest.test();
+        rtcpReceiverReportTest.test();*/
+
+        RtcpSourceDescriptionTest rtcpSourceDescriptionTest = new RtcpSourceDescriptionTest();
+        rtcpSourceDescriptionTest.test();
     }
 
 }

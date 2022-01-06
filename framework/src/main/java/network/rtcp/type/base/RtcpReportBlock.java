@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.module.ByteUtil;
 
-public class ReportBlock {
+public class RtcpReportBlock {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
@@ -78,7 +78,7 @@ public class ReportBlock {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public ReportBlock(long ssrc, short f, int c, long ehsn, long j, long lsr, long dlsr) {
+    public RtcpReportBlock(long ssrc, short f, int c, long ehsn, long j, long lsr, long dlsr) {
         this.ssrc = (int) ssrc;
         this.f = f;
         this.c = c;
@@ -88,10 +88,10 @@ public class ReportBlock {
         this.dlsr = (int) dlsr;
     }
 
-    public ReportBlock() {}
+    public RtcpReportBlock() {}
 
-    private static final Logger logger = LoggerFactory.getLogger(ReportBlock.class);
-    public ReportBlock(byte[] data) {
+    private static final Logger logger = LoggerFactory.getLogger(RtcpReportBlock.class);
+    public RtcpReportBlock(byte[] data) {
         if (data.length >= LENGTH) {
             int index = 0;
 

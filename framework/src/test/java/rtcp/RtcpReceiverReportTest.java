@@ -2,8 +2,7 @@ package rtcp;
 
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.type.RtcpReceiverReport;
-import network.rtcp.type.RtcpSenderReport;
-import network.rtcp.type.base.ReportBlock;
+import network.rtcp.type.base.RtcpReportBlock;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -30,8 +29,8 @@ public class RtcpReceiverReportTest {
         RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, (short) 201, 7, 26422708);
 
         // REPORT BLOCK LIST
-        List<ReportBlock> reportBlockList = new ArrayList<>();
-        ReportBlock source1 = new ReportBlock(
+        List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
+        RtcpReportBlock source1 = new RtcpReportBlock(
                 1569920308,
                 (byte) 0,
                 1,
@@ -40,11 +39,12 @@ public class RtcpReceiverReportTest {
                 curTime,
                 35390
         );
-        reportBlockList.add(source1);
+        rtcpReportBlockList.add(source1);
 
+        // RtcpReceiverReport
         RtcpReceiverReport rtcpReceiverReport = new RtcpReceiverReport(
                 rtcpHeader,
-                reportBlockList,
+                rtcpReportBlockList,
                 null
         );
         logger.debug("[RtcpReceiverReportTest][creationTest] RtcpSenderReport: \n{}", rtcpReceiverReport);
