@@ -1,4 +1,4 @@
-package network.rtcp;
+package network.rtcp.packet;
 
 public class RtcpPacket {
 

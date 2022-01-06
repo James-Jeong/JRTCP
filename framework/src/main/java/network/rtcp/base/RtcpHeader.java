@@ -1,4 +1,4 @@
-package network.rtcp;
+package network.rtcp.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,15 +21,25 @@ public class RtcpHeader {
     public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc))
 
     // Version
-    private int v;
+    // Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
+    // The version defined by this specification is two (2).
+    private int v; // (2 bits)
 
     // Padding
-    private int p;
+    // If the padding bit is set, this RTCP packet contains some additional padding octets
+    // at the end which are not part of the control information.
+    // The last octet of the padding is a count of how many padding octets should be ignored.
+    // Padding may be needed by some encryption algorithms with fixed block sizes.
+    // In a compound RTCP packet, padding should only be required on
+    // the last individual packet because the compound packet is encrypted as a whole.
+    private int p; // (1 bit)
 
-    // The number of reception report blocks contained in this packet
-    private int rc;
+    // The number of reception report blocks contained in this packet.
+    // A value of zero is valid.
+    private int rc; // (5 bits)
 
     // The packet type
+    // Contains the constant 200 to identify this as an RTCP SR packet.
     /**
      * 200 = SR Sender Report packet
      * 201 = RR Receiver Report packet
@@ -37,18 +47,19 @@ public class RtcpHeader {
      * 203 = BYE Goodbye packet
      * 204 = APP Application-defined packet
      */
-    private int pt;
+    private int pt; // (8 bits)
 
-    // The length of rtcp packet including the header and any padding
-    private int l;
+    // The length of this RTCP packet in 32-bit words minus one,
+    // including the header and any padding.
+    private int l; // (16 bits)
 
-    // The synchronization source identifier
-    private long ssrc;
+    // The synchronization source identifier for the originator of this SR packet.
+    private int ssrc; // (32 bits)
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpHeader(int v, int p, int rc, int pt, int l, long ssrc) {
+    public RtcpHeader(int v, int p, int rc, int pt, int l, int ssrc) {
         this.v = v;
         this.p = p;
         this.rc = rc;
@@ -86,23 +97,14 @@ public class RtcpHeader {
             // SSRC
             byte[] ssrcData = new byte[4];
             System.arraycopy(data, index, ssrcData, 0, 4);
-            ssrc = ByteUtil.bytesToLong(ssrcData, true);
+            ssrc = ByteUtil.bytesToInt(ssrcData, true);
         }
     }
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
-    public void setData(int v, int p, int rc, int pt, int l, long ssrc) {
-        this.v = v;
-        this.p = p;
-        this.rc = rc;
-        this.pt = pt;
-        this.l = l;
-        this.ssrc = ssrc;
-    }
-
-    public byte[] getByteData() {
+    public byte[] getData() {
         byte[] data = new byte[LENGTH];
         int index = 0;
 
@@ -131,6 +133,15 @@ public class RtcpHeader {
         System.arraycopy(ssrcData, 0, data, index, 2);
 
         return data;
+    }
+
+    public void setData(int v, int p, int rc, int pt, int l, int ssrc) {
+        this.v = v;
+        this.p = p;
+        this.rc = rc;
+        this.pt = pt;
+        this.l = l;
+        this.ssrc = ssrc;
     }
 
     public int getV() {
@@ -177,7 +188,7 @@ public class RtcpHeader {
         return ssrc;
     }
 
-    public void setSsrc(long ssrc) {
+    public void setSsrc(int ssrc) {
         this.ssrc = ssrc;
     }
 

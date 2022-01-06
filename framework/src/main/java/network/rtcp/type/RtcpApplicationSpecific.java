@@ -1,4 +1,4 @@
-package network.rtcp;
+package network.rtcp.type;
 
 public class RtcpApplicationSpecific {
 
