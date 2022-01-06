@@ -11,7 +11,7 @@ public class TestMain {
         //NetworkTest networkTest = new NetworkTest();
         //networkTest.test();
 
-        /*RtcpHeaderTest rtcpHeaderTest = new RtcpHeaderTest();
+        RtcpHeaderTest rtcpHeaderTest = new RtcpHeaderTest();
         rtcpHeaderTest.test();
 
         RtcpReportBlockTest rtcpReportBlockTest = new RtcpReportBlockTest();
@@ -21,7 +21,7 @@ public class TestMain {
         rtcpSenderReportTest.test();
 
         RtcpReceiverReportTest rtcpReceiverReportTest = new RtcpReceiverReportTest();
-        rtcpReceiverReportTest.test();*/
+        rtcpReceiverReportTest.test();
 
         RtcpSourceDescriptionTest rtcpSourceDescriptionTest = new RtcpSourceDescriptionTest();
         rtcpSourceDescriptionTest.test();

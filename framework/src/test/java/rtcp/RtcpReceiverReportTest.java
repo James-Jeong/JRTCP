@@ -1,6 +1,7 @@
 package rtcp;
 
 import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpType;
 import network.rtcp.type.RtcpReceiverReport;
 import network.rtcp.type.base.RtcpReportBlock;
 import org.apache.commons.net.ntp.TimeStamp;
@@ -26,7 +27,7 @@ public class RtcpReceiverReportTest {
         long curTime = TimeStamp.getCurrentTime().getTime();
 
         // HEADER
-        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, (short) 201, 7, 26422708);
+        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, RtcpType.RECEIVER_REPORT, 7, 26422708);
 
         // REPORT BLOCK LIST
         List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();

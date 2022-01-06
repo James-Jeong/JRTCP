@@ -1,6 +1,7 @@
 package rtcp;
 
 import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpType;
 import network.rtcp.type.RtcpReceiverReport;
 import network.rtcp.type.RtcpSourceDescription;
 import network.rtcp.type.base.RtcpReportBlock;
@@ -31,7 +32,7 @@ public class RtcpSourceDescriptionTest {
 
     private byte[] creationTest() {
         // HEADER
-        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, (short) 201, 7, 26422708);
+        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, RtcpType.SOURCE_DESCRIPTION, 7, 26422708);
 
         // SDES CHUNK LIST
         List<SdesChunk> sdesChunkList = new ArrayList<>();
