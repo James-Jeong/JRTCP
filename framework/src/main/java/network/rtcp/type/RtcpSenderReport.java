@@ -2,23 +2,19 @@ package network.rtcp.type;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import network.rtcp.base.RtcpFormat;
 import network.rtcp.type.base.RtcpReportBlock;
-import network.rtcp.base.RtcpHeader;
 import util.module.ByteUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RtcpSenderReport {
+public class RtcpSenderReport extends RtcpFormat {
 
     /**
      *  0                   1                   2                   3
      *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |V=2|P|    RC   |   PT=SR=200   |             length            | header
-     * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |                         SSRC of sender                        |
-     * +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
      * |              NTP timestamp, most significant word             | sender
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ info
      * |             NTP timestamp, least significant word             |
@@ -51,10 +47,7 @@ public class RtcpSenderReport {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpHeader.LENGTH + 20; // bytes
-
-    // RTCP HEADER
-    private RtcpHeader rtcpHeader = null;
+    public static final int MIN_LENGTH = 20; // bytes
 
     // The npt timestamp that indicates the point of time measured
     // in wall clock time when this report was sent.
@@ -93,10 +86,8 @@ public class RtcpSenderReport {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpSenderReport(RtcpHeader rtcpHeader,
-                            long mswNts, long lswNts, long rts, long spc, long soc,
+    public RtcpSenderReport(long mswNts, long lswNts, long rts, long spc, long soc,
                             List<RtcpReportBlock> rtcpReportBlockList, byte[] profileSpecificExtensions) {
-        this.rtcpHeader = rtcpHeader;
         this.mswNts = (int) mswNts;
         this.lswNts = (int) lswNts;
         this.rts = (int) rts;
@@ -109,16 +100,10 @@ public class RtcpSenderReport {
     public RtcpSenderReport() {}
 
     public RtcpSenderReport(byte[] data) {
-        int index = 0;
         int dataLength = data.length;
         if (dataLength >= MIN_LENGTH) {
+            int index = 0;
             rtcpReportBlockList = null;
-
-            // HEADER
-            byte[] headerData = new byte[RtcpHeader.LENGTH];
-            System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
-            rtcpHeader = new RtcpHeader(headerData);
-            index += RtcpHeader.LENGTH;
 
             // NTS > TimeStamp.getCurrentTime().getTime()
             byte[] mswNtsData = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -188,18 +173,10 @@ public class RtcpSenderReport {
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
+    @Override
     public byte[] getData() {
-        if (rtcpHeader == null) {
-            return null;
-        }
-
         byte[] data = new byte[MIN_LENGTH];
         int index = 0;
-
-        // HEADER
-        byte[] headerData = rtcpHeader.getData();
-        System.arraycopy(headerData, 0, data, index, headerData.length);
-        index += headerData.length;
 
         // NTS
         byte[] ntsData = new byte[ByteUtil.NUM_BYTES_IN_LONG];
@@ -252,10 +229,8 @@ public class RtcpSenderReport {
         return data;
     }
 
-    public void setData(RtcpHeader rtcpHeader,
-                        long mswNts, long lswNts, long rts, long spc, long soc,
+    public void setData(long mswNts, long lswNts, long rts, long spc, long soc,
                         List<RtcpReportBlock> rtcpReportBlockList, byte[] profileSpecificExtensions) {
-        this.rtcpHeader = rtcpHeader;
         this.mswNts = mswNts;
         this.lswNts = lswNts;
         this.rts = rts;
@@ -263,14 +238,6 @@ public class RtcpSenderReport {
         this.soc = soc;
         this.rtcpReportBlockList = rtcpReportBlockList;
         this.profileSpecificExtensions = profileSpecificExtensions;
-    }
-
-    public RtcpHeader getRtcpHeader() {
-        return rtcpHeader;
-    }
-
-    public void setRtcpHeader(RtcpHeader rtcpHeader) {
-        this.rtcpHeader = rtcpHeader;
     }
 
     public long getMswNts() {

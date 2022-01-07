@@ -1,6 +1,7 @@
 package rtcp;
 
 import network.rtcp.base.RtcpHeader;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ public class RtcpHeaderTest {
         logger.debug("[RtcpHeaderTest][creationTest] RtcpHeader: \n{}", rtcpHeader);
 
         byte[] rtcpHeaderData = rtcpHeader.getData();
+        Assert.assertNotNull(rtcpHeaderData);
         logger.debug("[RtcpHeaderTest][creationTest] RtcpHeader byte data: \n{}", rtcpHeaderData);
         logger.debug("[RtcpHeaderTest][creationTest] RtcpHeader byte data: \n{}", ByteUtil.byteArrayToHex(rtcpHeaderData));
         return rtcpHeaderData;

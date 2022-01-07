@@ -10,7 +10,7 @@ public class RtcpHeader {
      *  0               1               2               3
      *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |V=2|P|    RC   |   PT=SR=200   |             length L          |
+     * |V=2|P|    RC   |       PT      |             length L          |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      * |                         SSRC of sender                        |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -34,6 +34,7 @@ public class RtcpHeader {
     // In a compound RTCP packet, padding should only be required on
     // the last individual packet because the compound packet is encrypted as a whole.
     private int padding = 0; // (1 bit)
+    private int paddingBytes = 0;
 
     // 1) The number of reception report blocks contained in this packet.
     //      A value of zero is valid.
@@ -52,9 +53,18 @@ public class RtcpHeader {
     private short packetType = 0; // (8 bits)
 
     // LENGTH
-    // The length of this RTCP packet in 32-bit words minus one,
-    // including the header and any padding.
-    private int length = 0; // (16 bits) TODO > HOW TO CALCULATE BYTE
+    // - The length of this RTCP packet in 32-bit words minus one, including the header and any padding.
+    // - The offset of one makes zero a valid length and avoids a possible infinite loop in scanning a compound RTCP packet,
+    // while counting 32 bit words avoids a validity check for a multiple of 4.
+    // - (length + 1) * 4 > 실제 RTCP 패킷의 전체 바이트 수
+    // - length 값에 1 을 더하는 이유
+    //      > 패킷은 32 비트의 워드 단위로 이루어져있고 이 워드의 배수에서 -1 을 뺀 값이 저장되어 있다.
+    //      > 그래서 1 을 더해야 워드 배수가 나온다.
+    // - 4 를 곱해야 전체 바이트 수 가 나오는 이유
+    //      > 패킷은 1 word(4바이트) 단위로 끊어서 분석되어야 하기 때문에 항상 4(바이트)의 배수이어야 한다.
+    // - 그래서 내부 로직에서 RTCP 패킷을 32 비트 워드 단위로 만들어줘야한다. > 패킷 레벨에서 zero padding 필요 (Format 레벨에서는 할 필요 없음, 데이터 원본 유지 필요)
+    //      > 패딩한다고 해서 헤더의 padding 값을 true 로 따로 설정하지 않는다. > 이유는 모름 > RTCP 패킷 예제들 보면 패딩은 되어 있지만 true 로 설정되어 있지 않음
+    private int length = 0; // (16 bits)
 
     // SSRC
     // The synchronization source identifier for the originator of this SR packet.
@@ -69,6 +79,16 @@ public class RtcpHeader {
         this.resourceCount = resourceCount;
         this.packetType = packetType;
         this.length = length;
+        this.ssrc = (int) ssrc;
+    }
+
+    public RtcpHeader(int version, RtcpPacketPaddingResult rtcpPacketPaddingResult, int resourceCount, short packetType, long ssrc) {
+        this.version = version;
+        this.padding = rtcpPacketPaddingResult.isPadding()? 1 : 0;
+        this.paddingBytes = rtcpPacketPaddingResult.getPaddingBytes();
+        this.resourceCount = resourceCount;
+        this.packetType = packetType;
+        this.length = rtcpPacketPaddingResult.getLength();
         this.ssrc = (int) ssrc;
     }
 
@@ -170,6 +190,14 @@ public class RtcpHeader {
 
     public void setPadding(int padding) {
         this.padding = padding;
+    }
+
+    public int getPaddingBytes() {
+        return paddingBytes;
+    }
+
+    public void setPaddingBytes(int paddingBytes) {
+        this.paddingBytes = paddingBytes;
     }
 
     public int getResourceCount() {

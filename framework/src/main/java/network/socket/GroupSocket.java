@@ -4,7 +4,6 @@ import instance.BaseEnvironment;
 import instance.DebugLevel;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import network.definition.DestinationRecord;

@@ -1,7 +1,3 @@
-import network.NetworkTest;
-import network.rtcp.type.RtcpApplicationDefined;
-import network.rtcp.type.RtcpSourceDescription;
-import network.rtcp.type.base.sdes.SdesItem;
 import org.junit.Test;
 import rtcp.*;
 
@@ -32,6 +28,12 @@ public class TestMain {
 
         RtcpApplicationDefinedTest rtcpApplicationDefinedTest = new RtcpApplicationDefinedTest();
         rtcpApplicationDefinedTest.test();
+
+        RtcpPacketTest rtcpPacketTest = new RtcpPacketTest();
+        rtcpPacketTest.test();
+
+        RtcpCompoundPacketTest rtcpCompoundPacketTest = new RtcpCompoundPacketTest();
+        rtcpCompoundPacketTest.test();
     }
 
 }

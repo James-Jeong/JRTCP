@@ -1,14 +1,10 @@
 package rtcp;
 
-import network.rtcp.base.RtcpHeader;
-import network.rtcp.base.RtcpType;
-import network.rtcp.type.RtcpReceiverReport;
 import network.rtcp.type.RtcpSourceDescription;
-import network.rtcp.type.base.RtcpReportBlock;
 import network.rtcp.type.base.sdes.SdesChunk;
 import network.rtcp.type.base.sdes.SdesItem;
 import network.rtcp.type.base.sdes.SdesType;
-import org.apache.commons.net.ntp.TimeStamp;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +27,6 @@ public class RtcpSourceDescriptionTest {
     }
 
     private byte[] creationTest() {
-        // HEADER
-        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 1, RtcpType.SOURCE_DESCRIPTION, 7, 26422708);
-
         // SDES CHUNK LIST
         List<SdesChunk> sdesChunkList = new ArrayList<>();
 
@@ -52,22 +45,17 @@ public class RtcpSourceDescriptionTest {
         sdesChunkList.add(sdesChunk1);
 
         // RtcpSourceDescription
-        RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(
-                rtcpHeader,
-                sdesChunkList
-        );
+        RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(sdesChunkList);
         logger.debug("[RtcpSourceDescriptionTest][creationTest] RtcpSourceDescription: \n{}", rtcpSourceDescription);
 
         byte[] rtcpSourceDescriptionData = rtcpSourceDescription.getData();
+        Assert.assertNotNull(rtcpSourceDescriptionData);
         logger.debug("[RtcpSourceDescriptionTest][creationTest] ReportBlock byte data: \n{}", rtcpSourceDescriptionData);
         logger.debug("[RtcpSourceDescriptionTest][creationTest] ReportBlock byte data: \n{}", ByteUtil.byteArrayToHex(rtcpSourceDescriptionData));
         return rtcpSourceDescriptionData;
     }
 
     private byte[] multiChunkTest() {
-        // HEADER
-        RtcpHeader rtcpHeader = new RtcpHeader(2, 0, 3, (short) 201, 7, 26422708);
-
         // SDES CHUNK LIST
         List<SdesChunk> sdesChunkList = new ArrayList<>();
 
@@ -112,10 +100,7 @@ public class RtcpSourceDescriptionTest {
         sdesChunkList.add(sdesChunk3);
 
         // RtcpSourceDescription
-        RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(
-                rtcpHeader,
-                sdesChunkList
-        );
+        RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(sdesChunkList);
         logger.debug("[RtcpSourceDescriptionTest][creationTest] RtcpSourceDescription: \n{}", rtcpSourceDescription);
 
         byte[] rtcpSourceDescriptionData = rtcpSourceDescription.getData();

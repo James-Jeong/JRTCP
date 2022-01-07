@@ -2,18 +2,16 @@ package network.rtcp.type;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpFormat;
 import util.module.ByteUtil;
 
 import java.nio.charset.StandardCharsets;
 
-public class RtcpApplicationDefined {
+public class RtcpApplicationDefined extends RtcpFormat {
 
     /**
      *  0               1               2               3
      *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-     * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |V=2|P|   ST    |   PT=APP=204  |            length L           |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      * |                              SSRC                             |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -25,10 +23,7 @@ public class RtcpApplicationDefined {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpHeader.LENGTH + ByteUtil.NUM_BYTES_IN_INT; // bytes
-
-    // RTCP HEADER
-    private RtcpHeader rtcpHeader = null;
+    public static final int MIN_LENGTH = ByteUtil.NUM_BYTES_IN_INT; // bytes
 
     // NAME
     // - A name chosen by the person defining the set of APP packets to be unique
@@ -49,8 +44,7 @@ public class RtcpApplicationDefined {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpApplicationDefined(RtcpHeader rtcpHeader, String name, byte[] applicationDependentData) {
-        this.rtcpHeader = rtcpHeader;
+    public RtcpApplicationDefined(String name, byte[] applicationDependentData) {
         this.name = name;
         this.applicationDependentData = applicationDependentData;
     }
@@ -60,12 +54,6 @@ public class RtcpApplicationDefined {
     public RtcpApplicationDefined(byte[] data) {
         if (data.length >= MIN_LENGTH) {
             int index = 0;
-
-            // HEADER
-            byte[] headerData = new byte[RtcpHeader.LENGTH];
-            System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
-            rtcpHeader = new RtcpHeader(headerData);
-            index += RtcpHeader.LENGTH;
 
             // NAME
             byte[] nameData = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -85,18 +73,10 @@ public class RtcpApplicationDefined {
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
+    @Override
     public byte[] getData() {
-        if (rtcpHeader == null) {
-            return null;
-        }
-
         byte[] data = new byte[MIN_LENGTH];
         int index = 0;
-
-        // HEADER
-        byte[] headerData = rtcpHeader.getData();
-        System.arraycopy(headerData, 0, data, index, headerData.length);
-        index += headerData.length;
 
         // NAME
         byte[] nameData = name.getBytes(StandardCharsets.UTF_8);
@@ -111,18 +91,9 @@ public class RtcpApplicationDefined {
         return data;
     }
 
-    public void setData(RtcpHeader rtcpHeader, String name, byte[] applicationDependentData) {
-        this.rtcpHeader = rtcpHeader;
+    public void setData(String name, byte[] applicationDependentData) {
         this.name = name;
         this.applicationDependentData = applicationDependentData;
-    }
-
-    public RtcpHeader getRtcpHeader() {
-        return rtcpHeader;
-    }
-
-    public void setRtcpHeader(RtcpHeader rtcpHeader) {
-        this.rtcpHeader = rtcpHeader;
     }
 
     public String getName() {

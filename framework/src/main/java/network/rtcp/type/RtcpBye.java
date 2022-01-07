@@ -2,34 +2,25 @@ package network.rtcp.type;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpFormat;
 import util.module.ByteUtil;
 
 import java.nio.charset.StandardCharsets;
 
-public class RtcpBye {
+public class RtcpBye extends RtcpFormat {
 
     /**
      *  0               1               2               3
      *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |V=2|P|    SC   |   PT=BYE=203  |            length L           |
-     * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * |                           SSRC/CSRC                           |
-     * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     * :                              ...                              :
-     * +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
      * |     length    |               reason for leaving (opt)       ...
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      */
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpHeader.LENGTH + 1; // bytes
+    public static final int MIN_LENGTH = 1; // bytes
     public static final int LIMIT_REASON_LENGTH = 255; // bytes
-
-    // RTCP HEADER
-    private RtcpHeader rtcpHeader = null;
 
     // LENGTH
     private short length = 0; // (8 bits)
@@ -40,8 +31,7 @@ public class RtcpBye {
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpBye(RtcpHeader rtcpHeader, short length, String reason) {
-        this.rtcpHeader = rtcpHeader;
+    public RtcpBye(short length, String reason) {
         this.length = (byte) length;
         this.reason = reason;
     }
@@ -51,12 +41,6 @@ public class RtcpBye {
     public RtcpBye(byte[] data) {
         if (data.length >= MIN_LENGTH) {
             int index = 0;
-
-            // HEADER
-            byte[] headerData = new byte[RtcpHeader.LENGTH];
-            System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
-            rtcpHeader = new RtcpHeader(headerData);
-            index += RtcpHeader.LENGTH;
 
             // LENGTH
             byte[] lengthData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
@@ -81,18 +65,10 @@ public class RtcpBye {
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
+    @Override
     public byte[] getData() {
-        if (rtcpHeader == null) {
-            return null;
-        }
-
         byte[] data = new byte[MIN_LENGTH];
         int index = 0;
-
-        // HEADER
-        byte[] headerData = rtcpHeader.getData();
-        System.arraycopy(headerData, 0, data, index, headerData.length);
-        index += headerData.length;
 
         // LENGTH
         byte[] lengthData = ByteUtil.shortToBytes(length, true);
@@ -109,14 +85,6 @@ public class RtcpBye {
         }
 
         return data;
-    }
-
-    public RtcpHeader getRtcpHeader() {
-        return rtcpHeader;
-    }
-
-    public void setRtcpHeader(RtcpHeader rtcpHeader) {
-        this.rtcpHeader = rtcpHeader;
     }
 
     public short getLength() {
