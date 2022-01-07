@@ -51,9 +51,12 @@ public class RtcpPacket {
         if (data.length >= RtcpHeader.LENGTH) {
             byte[] headerData = new byte[RtcpHeader.LENGTH];
             System.arraycopy(data, 0, headerData, 0, RtcpHeader.LENGTH);
-
             rtcpHeader = new RtcpHeader(headerData);
-            rtcpFormat = getRtcpFormatByByteData(rtcpHeader.getPacketType(), data);
+
+            int remainDataLength = data.length - RtcpHeader.LENGTH;
+            byte[] remainData = new byte[remainDataLength];
+            System.arraycopy(data, RtcpHeader.LENGTH, remainData, 0, remainDataLength);
+            rtcpFormat = getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData);
         }
     }
     ////////////////////////////////////////////////////////////
@@ -172,6 +175,12 @@ public class RtcpPacket {
         else {
             return rtcpPacketPaddingResult;
         }
+    }
+
+    public static int getRemainBytesByPacketLength(int length) { // except for header length
+        if (length <= 0) { return 0; }
+        int resultLength = (length + 1) * 4;
+        return resultLength - RtcpHeader.LENGTH;
     }
 
     @Override

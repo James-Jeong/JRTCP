@@ -26,7 +26,7 @@ public class RtcpPacketTest {
         getTest(data);
     }
 
-    public byte[] srCreationTest() {
+    public static byte[] srCreationTest() {
         // SR
         long curTime = TimeStamp.getCurrentTime().getTime();
 

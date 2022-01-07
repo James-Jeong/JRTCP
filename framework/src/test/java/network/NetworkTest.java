@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import network.definition.NetAddress;
 import network.handler.ClientHandler;
 import network.handler.ServerHandler;
+import network.rtcp.handler.RtcpServerHandler;
 import network.socket.GroupSocket;
 import network.socket.SocketManager;
 import network.socket.SocketProtocol;
@@ -47,26 +48,9 @@ public class NetworkTest {
         NetAddress netAddress2 = new NetAddress("127.0.0.1", 6000,true, SocketProtocol.UDP);
         //
 
-        // Netty Channel Initializer 생성
-        ChannelInitializer<NioDatagramChannel> clientChannelInitializer = new ChannelInitializer<NioDatagramChannel>() {
-            @Override
-            protected void initChannel(NioDatagramChannel nioDatagramChannel) {
-                final ChannelPipeline channelPipeline = nioDatagramChannel.pipeline();
-                channelPipeline.addLast(new ClientHandler());
-            }
-        };
-
-        ChannelInitializer<NioDatagramChannel> serverChannelInitializer = new ChannelInitializer<NioDatagramChannel>() {
-            @Override
-            protected void initChannel(NioDatagramChannel nioDatagramChannel) {
-                final ChannelPipeline channelPipeline = nioDatagramChannel.pipeline();
-                channelPipeline.addLast(new ServerHandler());
-            }
-        };
-        //
-
         // 소켓 생성 (GroupSocket)
-        Assert.assertTrue(socketManager.addSocket(netAddress1, serverChannelInitializer));
+        ChannelInitializer<NioDatagramChannel> serverChannelInitializer1 = ChannelHandlerMaker.get(new ServerHandler());
+        Assert.assertTrue(socketManager.addSocket(netAddress1, serverChannelInitializer1));
         GroupSocket groupSocket1 = socketManager.getSocket(netAddress1);
         Assert.assertNotNull(groupSocket1);
         // Listen channel open
@@ -74,13 +58,15 @@ public class NetworkTest {
         //
 
         // 소켓 생성 (GroupSocket)
-        Assert.assertTrue(socketManager.addSocket(netAddress2, serverChannelInitializer));
+        ChannelInitializer<NioDatagramChannel> serverChannelInitializer2 = ChannelHandlerMaker.get(new ServerHandler());
+        Assert.assertTrue(socketManager.addSocket(netAddress2, serverChannelInitializer2));
         GroupSocket groupSocket2 = socketManager.getSocket(netAddress2);
         Assert.assertNotNull(groupSocket2);
         Assert.assertTrue(groupSocket2.getListenSocket().openListenChannel());
         //
 
         // Destination 추가
+        ChannelInitializer<NioDatagramChannel> clientChannelInitializer = ChannelHandlerMaker.get(new ClientHandler());
         Assert.assertTrue(groupSocket1.addDestination(netAddress2, null, 1234, clientChannelInitializer));
         baseEnvironment.printMsg("GROUP-SOCKET1: {%s}", groupSocket1.toString());
         baseEnvironment.printMsg("GROUP-SOCKET2: {%s}", groupSocket2.toString());

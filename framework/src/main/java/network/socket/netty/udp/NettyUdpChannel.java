@@ -6,18 +6,19 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import network.socket.netty.NettyChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class NettyUdpChannel extends NettyChannel {
+
+    private static final Logger logger = LoggerFactory.getLogger(NettyUdpChannel.class);
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
@@ -98,6 +99,9 @@ public class NettyUdpChannel extends NettyChannel {
         try {
             InetAddress address = InetAddress.getByName(ip);
             ChannelFuture channelFuture = bootstrap.connect(address, port).sync();
+            channelFuture.addListener(
+                    (ChannelFutureListener) future -> getBaseEnvironment().printMsg("Success to connect with remote peer. (ip=%s, port=%s)", ip, port)
+            );
             Channel channel =  channelFuture.channel();
             connectChannel = channel;
             return channel;
@@ -116,10 +120,16 @@ public class NettyUdpChannel extends NettyChannel {
 
     @Override
     public void sendData(byte[] data, int dataLength) {
-        if (connectChannel == null || connectChannel.isActive()) { return; }
+        if (connectChannel == null) {
+            getBaseEnvironment().printMsg(DebugLevel.WARN, "Fail to send the data. ConnectChannel is not active.");
+            return;
+        }
+
+        logger.debug("data.length: {}", data.length);
 
         ByteBuf buf = Unpooled.copiedBuffer(data);
         connectChannel.writeAndFlush(buf);
+        getBaseEnvironment().printMsg("Success to send the data. (size=%s)", dataLength);
     }
     ////////////////////////////////////////////////////////////
 
