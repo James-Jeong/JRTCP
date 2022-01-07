@@ -64,9 +64,11 @@ public class RtcpSourceDescriptionTest {
         SdesItem chunk1SdesItem1 = new SdesItem(SdesType.CNAME, 5, "CNAME");
         SdesItem chunk1SdesItem2 = new SdesItem(SdesType.PHONE, 5, "PHONE");
         SdesItem chunk1SdesItem3 = new SdesItem(SdesType.TOOL, 4, "TOOL");
+        SdesItem chunk1SdesItem4 = new SdesItem(SdesType.END, 0, null);
         chunk1SdesItemList.add(chunk1SdesItem1);
         chunk1SdesItemList.add(chunk1SdesItem2);
         chunk1SdesItemList.add(chunk1SdesItem3);
+        chunk1SdesItemList.add(chunk1SdesItem4);
         SdesChunk sdesChunk1 = new SdesChunk(
                 1569920308,
                 chunk1SdesItemList
@@ -78,9 +80,11 @@ public class RtcpSourceDescriptionTest {
         SdesItem chunk2SdesItem1 = new SdesItem(SdesType.CNAME, 5, "CNAME");
         SdesItem chunk2SdesItem2 = new SdesItem(SdesType.LOC, 3, "LOC");
         SdesItem chunk2SdesItem3 = new SdesItem(SdesType.EMAIL, 5, "EMAIL");
+        SdesItem chunk2SdesItem4 = new SdesItem(SdesType.END, 0, null);
         chunk2SdesItemList.add(chunk2SdesItem1);
         chunk2SdesItemList.add(chunk2SdesItem2);
         chunk2SdesItemList.add(chunk2SdesItem3);
+        chunk2SdesItemList.add(chunk2SdesItem4);
         SdesChunk sdesChunk2 = new SdesChunk(
                 26422708,
                 chunk2SdesItemList
@@ -91,8 +95,10 @@ public class RtcpSourceDescriptionTest {
         List<SdesItem> chunk3SdesItemList = new ArrayList<>();
         SdesItem chunk3SdesItem1 = new SdesItem(SdesType.CNAME, 5, "CNAME");
         SdesItem chunk3SdesItem2 = new SdesItem(SdesType.LOC, 3, "LOC");
+        SdesItem chunk3SdesItem3 = new SdesItem(SdesType.END, 0, null);
         chunk3SdesItemList.add(chunk3SdesItem1);
         chunk3SdesItemList.add(chunk3SdesItem2);
+        chunk3SdesItemList.add(chunk3SdesItem3);
         SdesChunk sdesChunk3 = new SdesChunk(
                 328590819,
                 chunk3SdesItemList

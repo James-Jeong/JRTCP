@@ -55,31 +55,36 @@ public class SdesChunk {
 
                 while (true) {
                     remainLength = data.length - index;
-                    if (remainLength < SdesItem.MIN_LENGTH) { break; }
+                    if (remainLength < 1) { break; }
+                    if (remainLength == 1) {
+                        SdesItem sdesItem = new SdesItem(SdesType.END, 0, null);
+                        sdesItemList.add(sdesItem);
+                        break;
+                    } else {
+                        byte[] curSdesItemHeader = new byte[SdesItem.MIN_LENGTH];
+                        System.arraycopy(data, index, curSdesItemHeader, 0, SdesItem.MIN_LENGTH);
+                        index += SdesItem.MIN_LENGTH;
 
-                    byte[] curSdesItemHeader = new byte[SdesItem.MIN_LENGTH];
-                    System.arraycopy(data, index, curSdesItemHeader, 0, SdesItem.MIN_LENGTH);
-                    index += SdesItem.MIN_LENGTH;
+                        int curSdesItemTextLength = curSdesItemHeader[1]; // (bytes)
+                        if (curSdesItemTextLength > 0) {
+                            remainLength = data.length - index;
+                            if (remainLength <= curSdesItemTextLength) {
+                                break;
+                            }
 
-                    int curSdesItemTextLength = curSdesItemHeader[1]; // (bytes)
-                    if (curSdesItemTextLength > 0) {
-                        remainLength = data.length - index;
-                        if (remainLength <= curSdesItemTextLength) {
+                            byte[] curSdesItemText = new byte[curSdesItemTextLength];
+                            System.arraycopy(data, index, curSdesItemText, 0, curSdesItemTextLength);
+                            index += curSdesItemTextLength;
+
+                            SdesItem sdesItem = new SdesItem(
+                                    SdesItem.getTypeByIndex(curSdesItemHeader[0]),
+                                    curSdesItemHeader[1],
+                                    new String(curSdesItemText, StandardCharsets.UTF_8)
+                            );
+                            sdesItemList.add(sdesItem);
+                        } else {
                             break;
                         }
-
-                        byte[] curSdesItemText = new byte[curSdesItemTextLength];
-                        System.arraycopy(data, index, curSdesItemText, 0, curSdesItemTextLength);
-                        index += curSdesItemTextLength;
-
-                        SdesItem sdesItem = new SdesItem(
-                                SdesItem.getTypeByIndex(curSdesItemHeader[0]),
-                                curSdesItemHeader[1],
-                                new String(curSdesItemText, StandardCharsets.UTF_8)
-                        );
-                        sdesItemList.add(sdesItem);
-                    } else {
-                        break;
                     }
                 }
             }

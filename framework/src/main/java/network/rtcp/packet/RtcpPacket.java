@@ -103,6 +103,7 @@ public class RtcpPacket {
         System.arraycopy(headerData, 0, data, index, headerData.length);
         index += headerData.length;
 
+        // BODY + PADDING
         byte[] rtcpFormatData = rtcpFormat.getData();
         if (rtcpFormatData != null && rtcpFormatData.length > 0) {
             // Check the validation of the format data size > The size must be a 32 bits word multiple!

@@ -2,11 +2,16 @@ package network.rtcp.packet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RtcpCompoundPacket {
+
+    private static final Logger logger = LoggerFactory.getLogger(RtcpCompoundPacket.class);
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
@@ -24,6 +29,32 @@ public class RtcpCompoundPacket {
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
+    public byte[] getData() {
+        int totalLength = getTotalRtcpPacketSize();
+        if (totalLength <= 0) {
+            return null;
+        }
+
+        byte[] data = new byte[totalLength];
+        int index = 0;
+
+        for (RtcpPacket rtcpPacket : rtcpPacketList) {
+            if (rtcpPacket == null) { continue; }
+
+            byte[] curPacketData = rtcpPacket.getData();
+            if (curPacketData == null) { continue; }
+
+            System.arraycopy(curPacketData, 0, data, index, curPacketData.length);
+            index += curPacketData.length;
+        }
+
+        return data;
+    }
+
+    public void setData(List<RtcpPacket> rtcpPacketList) {
+        this.rtcpPacketList = rtcpPacketList;
+    }
+
     public void addRtcpPacketToList(RtcpPacket rtcpPacket) {
         if (rtcpPacket == null) { return; }
         if (rtcpPacketList == null) {
@@ -68,7 +99,6 @@ public class RtcpCompoundPacket {
         int totalSize = 0;
         for (RtcpPacket rtcpPacket : rtcpPacketList) {
             if (rtcpPacket == null) { continue; }
-
             totalSize += rtcpPacket.getData().length;
         }
 

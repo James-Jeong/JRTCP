@@ -62,7 +62,6 @@ public class RtcpCompoundPacketTest {
 
         // HEADER
         RtcpPacketPaddingResult rtcpSenderReportPacketPaddingResult = RtcpPacket.getPacketLengthByBytes(rtcpSenderReportData.length);
-        //RtcpHeader rtcpSenderReportPacketHeader = new RtcpHeader(2, 0, 1, RtcpType.SENDER_REPORT, 7, 26422708);
         RtcpHeader rtcpSenderReportPacketHeader = new RtcpHeader(
                 2, rtcpSenderReportPacketPaddingResult,
                 rtcpSenderReport.getReportBlockList().size(), RtcpType.SENDER_REPORT, 26422708
@@ -96,11 +95,10 @@ public class RtcpCompoundPacketTest {
 
         // HEADER
         RtcpPacketPaddingResult rtcpSdesPacketPaddingResult = RtcpPacket.getPacketLengthByBytes(rtcpSourceDescriptionData.length);
-        logger.debug("RtcpPacketPaddingResult: {}", rtcpSdesPacketPaddingResult);
-        //RtcpHeader rtcpSdesPacketHeader = new RtcpHeader(2, 0, 1, RtcpType.SENDER_REPORT, 7, 26422708);
+        logger.debug("rtcpSdesPacketPaddingResult: {}", rtcpSdesPacketPaddingResult);
         RtcpHeader rtcpSdesPacketHeader = new RtcpHeader(
                 2, rtcpSdesPacketPaddingResult,
-                rtcpSourceDescription.getTotalSdesChunkSize(), RtcpType.SENDER_REPORT, 26422708
+                rtcpSourceDescription.getSdesChunkList().size(), RtcpType.SOURCE_DESCRIPTION, 26422708
         );
         RtcpPacket rtcpSdesPacket = new RtcpPacket(rtcpSdesPacketHeader, rtcpSourceDescription);
         ////////////////////////////////////////////////////////////////////////////

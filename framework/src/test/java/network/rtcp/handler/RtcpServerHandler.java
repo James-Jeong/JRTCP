@@ -44,12 +44,12 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
 
                 // 맨 처음 헤더 읽어서 길이 알아내서 해당 바이트 수 만큼 읽기
                 int loopCount = 0;
-                int remainDataLength;
+                int totalRemainDataLength;
                 List<RtcpPacket> rtcpPacketList = null;
                 while (true) {
-                    remainDataLength = readableBytes - index;
-                    logger.debug("[RtcpServerHandler<{}>] remainDataLength: [{}], index: [{}]", id, remainDataLength, index);
-                    if (remainDataLength <= 0) { break; }
+                    totalRemainDataLength = readableBytes - index;
+                    logger.debug("[RtcpServerHandler<{}>] remainDataLength: [{}], index: [{}]", id, totalRemainDataLength, index);
+                    if (totalRemainDataLength <= 0) { break; }
 
                     byte[] headerData = new byte[RtcpHeader.LENGTH];
                     System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
@@ -58,9 +58,10 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
                     RtcpHeader rtcpHeader = new RtcpHeader(headerData);
                     int packetLength = rtcpHeader.getLength();
                     if (packetLength <= 0) { break; }
-                    logger.debug("[RtcpServerHandler<{}>] PacketLength: [{}]", id, packetLength);
 
                     int curRemainDataLength = RtcpPacket.getRemainBytesByPacketLength(packetLength);
+                    logger.debug("[RtcpServerHandler<{}>] totalDataLength: [{}], index: [{}], PacketLength: [{}], curRemainDataLength: [{}]", id, readableBytes, index, packetLength, curRemainDataLength);
+
                     byte[] remainData = new byte[curRemainDataLength]; // body + padding
                     System.arraycopy(data, index, remainData, 0, curRemainDataLength);
                     index += curRemainDataLength;

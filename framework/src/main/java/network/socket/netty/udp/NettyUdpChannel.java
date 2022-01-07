@@ -125,8 +125,6 @@ public class NettyUdpChannel extends NettyChannel {
             return;
         }
 
-        logger.debug("data.length: {}", data.length);
-
         ByteBuf buf = Unpooled.copiedBuffer(data);
         connectChannel.writeAndFlush(buf);
         getBaseEnvironment().printMsg("Success to send the data. (size=%s)", dataLength);

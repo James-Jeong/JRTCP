@@ -105,27 +105,32 @@ public class SdesItem {
     }
 
     public byte[] getData() {
-        byte[] data = new byte[MIN_LENGTH];
-        int index = 0;
+        byte[] data;
+        if (sdesType == SdesType.END) {
+            data = new byte[]{0};
+        } else {
+            data = new byte[MIN_LENGTH];
+            int index = 0;
 
-        byte[] typeData = ByteUtil.intToBytes(sdesType.ordinal(), true);
-        System.arraycopy(typeData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
-        index += 1;
+            byte[] typeData = ByteUtil.intToBytes(sdesType.ordinal(), true);
+            System.arraycopy(typeData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
+            index += 1;
 
-        byte[] lengthData = ByteUtil.intToBytes(length, true);
-        System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
-        index += 1;
+            byte[] lengthData = ByteUtil.intToBytes(length, true);
+            System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
+            index += 1;
 
-        if (text != null) {
-            byte[] textData = text.getBytes(StandardCharsets.UTF_8);
-            int textLength = textData.length;
+            if (text != null) {
+                byte[] textData = text.getBytes(StandardCharsets.UTF_8);
+                int textLength = textData.length;
 
-            if (textLength > 0) {
-                byte[] newData = new byte[data.length + textLength];
-                System.arraycopy(data, 0, newData, 0, data.length);
-                data = newData;
+                if (textLength > 0) {
+                    byte[] newData = new byte[data.length + textLength];
+                    System.arraycopy(data, 0, newData, 0, data.length);
+                    data = newData;
 
-                System.arraycopy(textData, 0, data, index, textLength);
+                    System.arraycopy(textData, 0, data, index, textLength);
+                }
             }
         }
 

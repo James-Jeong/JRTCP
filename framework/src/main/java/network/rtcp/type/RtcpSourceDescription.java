@@ -49,7 +49,7 @@ public class RtcpSourceDescription extends RtcpFormat {
     public RtcpSourceDescription() {}
 
     public RtcpSourceDescription(byte[] data) {
-                // SDES CHUNK LIST
+        // SDES CHUNK LIST
         // Each chunk consists of an SSRC/CSRC identifier followed by a list of
         //   zero or more items, which carry information about the SSRC/CSRC. Each
         //   chunk starts on a 32-bit boundary. Each item consists of an 8-bit
@@ -60,12 +60,12 @@ public class RtcpSourceDescription extends RtcpFormat {
         // 1) Chunk 개수는 헤더에서 결정
         // 2) Chunk 는 SSRC 로 구분
         // 3) Chunk 는 마지막 바이트가 0 인 것으로 구분
-        int remainDataLength = data.length;
-        if (remainDataLength > 0) {
+        int dataLength = data.length;
+        if (dataLength > 0) {
             int index = 0;
             sdesChunkList = new ArrayList<>();
             List<Integer> chunkPositionList = new ArrayList<>();
-            for (int i = index; i < data.length; i++) {
+            for (int i = index; i < dataLength; i++) {
                 if (data[i] == 0) {
                     chunkPositionList.add(i);
                 }
@@ -78,15 +78,20 @@ public class RtcpSourceDescription extends RtcpFormat {
 
             int curChunkDataLength;
             for (int i = 0; i < chunkCount; i++) {
-                if (i + 1 >= chunkCount) { // 마지막인 chunk 인 경우
-                    curChunkDataLength = data.length - chunkPositionList.get(i);
+                if (i > 0) {
+                    curChunkDataLength = chunkPositionList.get(i) - chunkPositionList.get(i - 1);
                 } else {
-                    curChunkDataLength = chunkPositionList.get(i + 1);
+                    curChunkDataLength = chunkPositionList.get(i) + 1;
                 }
 
                 if (curChunkDataLength > 0) {
                     byte[] curChunkData = new byte[curChunkDataLength];
                     System.arraycopy(data, index, curChunkData, 0, curChunkDataLength);
+                    index += curChunkDataLength;
+                    if (curChunkData[0] == 0) {
+                        break;
+                    }
+
                     SdesChunk sdesChunk = new SdesChunk(curChunkData);
                     sdesChunkList.add(sdesChunk);
                 }
@@ -129,7 +134,8 @@ public class RtcpSourceDescription extends RtcpFormat {
         for (SdesChunk sdesChunk : sdesChunkList) {
             if (sdesChunk == null) { continue; }
 
-            totalSize += sdesChunk.getData().length;
+            byte[] sdesChunkData = sdesChunk.getData();
+            totalSize += sdesChunkData.length;
         }
 
         return totalSize;
