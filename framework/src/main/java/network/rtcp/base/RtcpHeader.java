@@ -19,30 +19,31 @@ public class RtcpHeader {
     ////////////////////////////////////////////////////////////
     // VARIABLES
     public static final int LENGTH = 8;// 8 bytes (4 + 4(ssrc, unsigned int))
+    public static final int LENGTH_SDES = 4;// 8 bytes (4(ssrc is not included))
     // (unsigned integer 변수들 때문에 크게 잡음 (오버플로우 방지하기 위함))
 
     // VERSION
-    // Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
-    // The version defined by this specification is two (2).
+    // - Identifies the version of RTP, which is the same in RTCP packets as in RTP data packets.
+    // - The version defined by this specification is two (2).
     private int version = 0; // (2 bits)
 
     // PADDING
-    // If the padding bit is set, this RTCP packet contains some additional padding octets
+    // - If the padding bit is set, this RTCP packet contains some additional padding octets
     // at the end which are not part of the control information.
-    // The last octet of the padding is a count of how many padding octets should be ignored.
-    // Padding may be needed by some encryption algorithms with fixed block sizes.
-    // In a compound RTCP packet, padding should only be required on
+    // - The last octet of the padding is a count of how many padding octets should be ignored.
+    // - Padding may be needed by some encryption algorithms with fixed block sizes.
+    // - In a compound RTCP packet, padding should only be required on
     // the last individual packet because the compound packet is encrypted as a whole.
     private int padding = 0; // (1 bit)
     private int paddingBytes = 0;
 
-    // 1) The number of reception report blocks contained in this packet.
+    // Resource count
+    // - The number of reception report blocks contained in this packet.
     //      A value of zero is valid.
-    // 2) The number of SSRC/CSRC chunks contained in this SDES packet.
     private int resourceCount = 0; // (5 bits)
 
     // PACKET TYPE
-    // Contains the constant 200 to identify this as an RTCP SR packet.
+    // - Contains the constant 200 to identify this as an RTCP SR packet.
     /**
      * 200 = SR Sender Report packet
      * 201 = RR Receiver Report packet
@@ -82,9 +83,17 @@ public class RtcpHeader {
         this.ssrc = (int) ssrc;
     }
 
+    public RtcpHeader(int version, int padding, int resourceCount, short packetType, int length) {
+        this.version = version;
+        this.padding = padding;
+        this.resourceCount = resourceCount;
+        this.packetType = packetType;
+        this.length = length;
+    }
+
     public RtcpHeader(int version, RtcpPacketPaddingResult rtcpPacketPaddingResult, int resourceCount, short packetType, long ssrc) {
         this.version = version;
-        this.padding = rtcpPacketPaddingResult.isPadding()? 1 : 0;
+        //this.padding = rtcpPacketPaddingResult.isPadding()? 1 : 0;
         this.paddingBytes = rtcpPacketPaddingResult.getPaddingBytes();
         this.resourceCount = resourceCount;
         this.packetType = packetType;
@@ -92,10 +101,19 @@ public class RtcpHeader {
         this.ssrc = (int) ssrc;
     }
 
+    public RtcpHeader(int version, RtcpPacketPaddingResult rtcpPacketPaddingResult, int resourceCount, short packetType) {
+        this.version = version;
+        //this.padding = rtcpPacketPaddingResult.isPadding()? 1 : 0;
+        this.paddingBytes = rtcpPacketPaddingResult.getPaddingBytes();
+        this.resourceCount = resourceCount;
+        this.packetType = packetType;
+        this.length = rtcpPacketPaddingResult.getLength();
+    }
+
     public RtcpHeader() {}
 
     public RtcpHeader(byte[] data) { // big endian
-        if (data.length >= LENGTH) {
+        if (data.length >= LENGTH_SDES) {
             int index = 0;
 
             // V, P, RC
@@ -123,11 +141,13 @@ public class RtcpHeader {
             index += ByteUtil.NUM_BYTES_IN_SHORT;
 
             // SSRC
-            byte[] ssrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
-            System.arraycopy(data, index, ssrcData, 0, ByteUtil.NUM_BYTES_IN_INT);
-            byte[] ssrcData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
-            System.arraycopy(ssrcData, 0, ssrcData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
-            ssrc = ByteUtil.bytesToLong(ssrcData2, true);
+            if (data.length >= LENGTH) {
+                byte[] ssrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+                System.arraycopy(data, index, ssrcData, 0, ByteUtil.NUM_BYTES_IN_INT);
+                byte[] ssrcData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+                System.arraycopy(ssrcData, 0, ssrcData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+                ssrc = ByteUtil.bytesToLong(ssrcData2, true);
+            }
         }
     }
     ////////////////////////////////////////////////////////////
@@ -135,7 +155,12 @@ public class RtcpHeader {
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
     public byte[] getData() {
-        byte[] data = new byte[LENGTH];
+        byte[] data;
+        if (packetType == RtcpType.SOURCE_DESCRIPTION) {
+            data = new byte[LENGTH_SDES];
+        } else {
+            data = new byte[LENGTH];
+        }
         int index = 0;
 
         // V, P, RC
@@ -161,8 +186,10 @@ public class RtcpHeader {
         index += 2;
 
         // SSRC
-        byte[] ssrcData = ByteUtil.intToBytes((int) ssrc, true);
-        System.arraycopy(ssrcData, 0, data, index, ssrcData.length);
+        if (packetType != RtcpType.SOURCE_DESCRIPTION) {
+            byte[] ssrcData = ByteUtil.intToBytes((int) ssrc, true);
+            System.arraycopy(ssrcData, 0, data, index, ssrcData.length);
+        }
 
         return data;
     }

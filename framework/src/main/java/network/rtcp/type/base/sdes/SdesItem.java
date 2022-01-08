@@ -2,11 +2,15 @@ package network.rtcp.type.base.sdes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.module.ByteUtil;
 
 import java.nio.charset.StandardCharsets;
 
 public class SdesItem {
+
+    private static final Logger logger = LoggerFactory.getLogger(SdesItem.class);
 
     /**
      * Only the CNAME item is mandatory.
@@ -107,17 +111,17 @@ public class SdesItem {
     public byte[] getData() {
         byte[] data;
         if (sdesType == SdesType.END) {
-            data = new byte[]{0};
+            data = new byte[]{ 0 };
         } else {
             data = new byte[MIN_LENGTH];
             int index = 0;
 
-            byte[] typeData = ByteUtil.intToBytes(sdesType.ordinal(), true);
-            System.arraycopy(typeData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
+            byte[] typeData = { (byte) sdesType.ordinal() };
+            System.arraycopy(typeData, 0, data, index, 1);
             index += 1;
 
-            byte[] lengthData = ByteUtil.intToBytes(length, true);
-            System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_INT - 1, data, index, 1);
+            byte[] lengthData = { (byte) length };
+            System.arraycopy(lengthData, 0, data, index, 1);
             index += 1;
 
             if (text != null) {

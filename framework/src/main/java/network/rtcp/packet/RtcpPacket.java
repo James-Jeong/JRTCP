@@ -2,10 +2,7 @@ package network.rtcp.packet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.base.RtcpFormat;
-import network.rtcp.base.RtcpHeader;
-import network.rtcp.base.RtcpPacketPaddingResult;
-import network.rtcp.base.RtcpType;
+import network.rtcp.base.*;
 import network.rtcp.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +45,23 @@ public class RtcpPacket {
     public RtcpPacket() {}
 
     public RtcpPacket(byte[] data) {
-        if (data.length >= RtcpHeader.LENGTH) {
+        if (data.length >= RtcpHeader.LENGTH_SDES) {
+            int headerLength;
             byte[] headerData = new byte[RtcpHeader.LENGTH];
             System.arraycopy(data, 0, headerData, 0, RtcpHeader.LENGTH);
             rtcpHeader = new RtcpHeader(headerData);
+            headerLength = headerData.length;
 
-            int remainDataLength = data.length - RtcpHeader.LENGTH;
+            if (rtcpHeader.getPacketType() == RtcpType.SOURCE_DESCRIPTION) {
+                byte[] sdesHeaderData = new byte[RtcpHeader.LENGTH_SDES];
+                System.arraycopy(data, 0, sdesHeaderData, 0, RtcpHeader.LENGTH_SDES);
+                rtcpHeader = new RtcpHeader(sdesHeaderData);
+                headerLength = sdesHeaderData.length;
+            }
+
+            int remainDataLength = data.length - headerLength;
             byte[] remainData = new byte[remainDataLength];
-            System.arraycopy(data, RtcpHeader.LENGTH, remainData, 0, remainDataLength);
+            System.arraycopy(data, headerLength, remainData, 0, remainDataLength);
             rtcpFormat = getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData);
         }
     }
@@ -95,7 +101,12 @@ public class RtcpPacket {
             return null;
         }
 
-        byte[] data = new byte[RtcpHeader.LENGTH];
+        byte[] data;
+        if (rtcpHeader.getPacketType() == RtcpType.SOURCE_DESCRIPTION) {
+            data = new byte[RtcpHeader.LENGTH_SDES];
+        } else {
+            data = new byte[RtcpHeader.LENGTH];
+        }
         int index = 0;
 
         // HEADER
@@ -117,7 +128,13 @@ public class RtcpPacket {
                 rtcpFormatDataLength = rtcpFormatData.length;
             }
 
-            byte[] newData = new byte[RtcpHeader.LENGTH + rtcpFormatDataLength];
+            int newHeaderLength;
+            if (rtcpHeader.getPacketType() == RtcpType.SOURCE_DESCRIPTION) {
+                newHeaderLength = RtcpHeader.LENGTH_SDES;
+            } else {
+                newHeaderLength = RtcpHeader.LENGTH;
+            }
+            byte[] newData = new byte[newHeaderLength + rtcpFormatDataLength];
             System.arraycopy(data, 0, newData, 0, data.length);
             data = newData;
 
@@ -149,7 +166,7 @@ public class RtcpPacket {
         this.rtcpFormat = rtcpFormat;
     }
 
-    public static RtcpPacketPaddingResult getPacketLengthByBytes(int bytes) {
+    public static RtcpPacketPaddingResult getPacketLengthByBytes(int bytes, boolean isSdes) {
         RtcpPacketPaddingResult rtcpPacketPaddingResult = new RtcpPacketPaddingResult();
 
         // 1) 데이터가 없으므로 0 을 반환
@@ -157,7 +174,13 @@ public class RtcpPacket {
 
         // 헤더가 8 바이트 고정이므로 기본적으로 패킷으로 구성되려면
         // 헤더를 포함한 전체 데이터 크기(Header + Body + Padding)는 8 바이트 초과되어야만 한다.
-        bytes += RtcpHeader.LENGTH;
+        // SDES 는 4 바이트 초과
+        if (isSdes) {
+            bytes += RtcpHeader.LENGTH_SDES;
+        } else {
+            bytes += RtcpHeader.LENGTH;
+        }
+
         int remainderBytesByMultiple = bytes % PACKET_MULTIPLE;
         if (remainderBytesByMultiple != 0) {
             int paddingLength = PACKET_MULTIPLE - remainderBytesByMultiple;
@@ -178,10 +201,14 @@ public class RtcpPacket {
         }
     }
 
-    public static int getRemainBytesByPacketLength(int length) { // except for header length
+    public static int getRemainBytesByPacketLength(int length, boolean isSdes) { // except for header length
         if (length <= 0) { return 0; }
         int resultLength = (length + 1) * 4;
-        return resultLength - RtcpHeader.LENGTH;
+        if (isSdes) {
+            return resultLength - RtcpHeader.LENGTH_SDES;
+        } else {
+            return resultLength - RtcpHeader.LENGTH;
+        }
     }
 
     @Override

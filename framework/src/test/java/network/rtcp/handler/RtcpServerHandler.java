@@ -4,7 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
+import network.rtcp.RtcpTest;
 import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpType;
 import network.rtcp.packet.RtcpCompoundPacket;
 import network.rtcp.packet.RtcpPacket;
 import org.slf4j.Logger;
@@ -51,15 +53,24 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
                     logger.debug("[RtcpServerHandler<{}>] remainDataLength: [{}], index: [{}]", id, totalRemainDataLength, index);
                     if (totalRemainDataLength <= 0) { break; }
 
-                    byte[] headerData = new byte[RtcpHeader.LENGTH];
-                    System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
-                    index += headerData.length;
-
+                    byte[] headerData = new byte[RtcpHeader.LENGTH_SDES];
+                    System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH_SDES);
                     RtcpHeader rtcpHeader = new RtcpHeader(headerData);
+                    if (rtcpHeader.getPacketType() != RtcpType.SOURCE_DESCRIPTION) {
+                        headerData = new byte[RtcpHeader.LENGTH];
+                        System.arraycopy(data, index, headerData, 0, RtcpHeader.LENGTH);
+                        rtcpHeader = new RtcpHeader(headerData);
+                    }
+                    index += headerData.length;
+                    logger.debug("[RtcpServerHandler<{}>] RtcpHeader[{}]: \n[{}]\nindex: [{}]", id, headerData.length, rtcpHeader, index);
+
                     int packetLength = rtcpHeader.getLength();
                     if (packetLength <= 0) { break; }
 
-                    int curRemainDataLength = RtcpPacket.getRemainBytesByPacketLength(packetLength);
+                    int curRemainDataLength = RtcpPacket.getRemainBytesByPacketLength(
+                            packetLength,
+                            rtcpHeader.getPacketType() == RtcpType.SOURCE_DESCRIPTION
+                    );
                     logger.debug("[RtcpServerHandler<{}>] totalDataLength: [{}], index: [{}], PacketLength: [{}], curRemainDataLength: [{}]", id, readableBytes, index, packetLength, curRemainDataLength);
 
                     byte[] remainData = new byte[curRemainDataLength]; // body + padding
@@ -71,12 +82,10 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
                             RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData)
                     );
 
-                    if (loopCount > 0) {
-                        if (rtcpPacketList == null) {
-                            rtcpPacketList = new ArrayList<>();
-                        }
-                        rtcpPacketList.add(rtcpPacket);
+                    if (rtcpPacketList == null) {
+                        rtcpPacketList = new ArrayList<>();
                     }
+                    rtcpPacketList.add(rtcpPacket);
 
                     logger.debug("[RtcpServerHandler<{}>] RtcpPacket: (size={}+{})\n{}", id, headerData.length, curRemainDataLength, rtcpPacket);
                     loopCount++;
