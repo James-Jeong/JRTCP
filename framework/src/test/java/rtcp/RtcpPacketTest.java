@@ -96,7 +96,7 @@ public class RtcpPacketTest {
         sdesChunkList.add(sdesChunk1);
 
         // CHUNK 2
-        /*List<SdesItem> chunk2SdesItemList = new ArrayList<>();
+        List<SdesItem> chunk2SdesItemList = new ArrayList<>();
         SdesItem chunk2SdesItem1 = new SdesItem(SdesType.CNAME, 5, "CNAME");
         SdesItem chunk2SdesItem2 = new SdesItem(SdesType.LOC, 3, "LOC");
         SdesItem chunk2SdesItem3 = new SdesItem(SdesType.EMAIL, 5, "EMAIL");
@@ -109,10 +109,10 @@ public class RtcpPacketTest {
                 26422708,
                 chunk2SdesItemList
         );
-        sdesChunkList.add(sdesChunk2);*/
+        sdesChunkList.add(sdesChunk2);
 
         // CHUNK 3
-        /*List<SdesItem> chunk3SdesItemList = new ArrayList<>();
+        List<SdesItem> chunk3SdesItemList = new ArrayList<>();
         SdesItem chunk3SdesItem1 = new SdesItem(SdesType.CNAME, 5, "CNAME");
         SdesItem chunk3SdesItem2 = new SdesItem(SdesType.LOC, 3, "LOC");
         SdesItem chunk3SdesItem3 = new SdesItem(SdesType.END, 0, null);
@@ -123,7 +123,7 @@ public class RtcpPacketTest {
                 328590819,
                 chunk3SdesItemList
         );
-        sdesChunkList.add(sdesChunk3);*/
+        sdesChunkList.add(sdesChunk3);
 
         // RtcpSourceDescription
         RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(sdesChunkList);

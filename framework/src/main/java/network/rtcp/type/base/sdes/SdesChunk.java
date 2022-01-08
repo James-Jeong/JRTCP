@@ -2,10 +2,12 @@ package network.rtcp.type.base.sdes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import network.rtcp.packet.RtcpPacket;
 import util.module.ByteUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SdesChunk {
@@ -121,6 +123,16 @@ public class SdesChunk {
                 byte[] sdesItemData = sdesItem.getData();
                 System.arraycopy(sdesItemData, 0, data, index, sdesItemData.length);
                 index += sdesItemData.length;
+            }
+
+            int bytes = data.length;
+            int remainderBytesByMultiple = bytes % RtcpPacket.PACKET_MULTIPLE;
+            if (remainderBytesByMultiple != 0) { // 4로 나누어 떨어지지 않으면 뒤에 남은 바이트 수만큼 패딩 바이트 추가
+                int paddingLength = RtcpPacket.PACKET_MULTIPLE - remainderBytesByMultiple;
+                newData = new byte[data.length + paddingLength];
+                Arrays.fill(newData, (byte) 0);
+                System.arraycopy(data, 0, newData, 0, data.length);
+                data = newData;
             }
         }
 
