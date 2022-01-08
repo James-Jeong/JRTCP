@@ -2,8 +2,6 @@ package network.rtcp.type.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import util.module.ByteUtil;
 
 public class RtcpReportBlock {
@@ -15,82 +13,84 @@ public class RtcpReportBlock {
     // SSRC
     private long ssrc; // (32 bits, unsigned int)
 
-    // Fraction of the RTP data packets from source that it assumes to be lost
-    // since it sent the previous SR or RR packet.
-    // expressed as a fixed point number with the binary point at the left edge of the field.
-    // This fraction is defined to be the number of packets lost
-    // divided by the number of packets expected, as defined in the next paragraph.
-    // (An implementation is shown in Appendix A.3.)
-    // If the loss is negative due to duplicates, the fraction lost is set to zero.
-    // Note that a receiver cannot tell whether any packets were lost after the last one received,
-    // and that there will be no reception report block issued for a source
-    // if all packets from that source sent during the last reporting interval have been lost.
-    private short f; // (8 bits, x/256)
+    // - Fraction of the RTP data packets from source that it assumes to be lost
+    //      since it sent the previous SR or RR packet.
+    // - Expressed as a fixed point number with the binary point at the left edge of the field.
+    // - This fraction is defined to be the number of packets lost
+    //      divided by the number of packets expected, as defined in the next paragraph.
+    //      (An implementation is shown in Appendix A.3.)
+    // - If the loss is negative due to duplicates, the fraction lost is set to zero.
+    // - Note that a receiver cannot tell whether any packets were lost after the last one received,
+    //      and that there will be no reception report block issued for a source
+    // - If all packets from that source sent during the last reporting interval have been lost.
+    private short fraction; // (8 bits, x/256)
 
     // Cumulative number of packets lost
-    // Total number of RTP dat packets from source that have been lost since the beginning of reception.
-    // Packets that arrive late ar not counted as lost, and the loss may be negative if there are duplicates.
-    private int c; // (24 bits)
+    // - Total number of RTP dat packets from source that have been lost since the beginning of reception.
+    // - Packets that arrive late ar not counted as lost, and the loss may be negative if there are duplicates.
+    private int cnpl; // (24 bits)
 
     // Extended Highest Sequence Number
-    // The least significant 16 bits (Sequence number cycles count)
+    // - The least significant 16 bits (Sequence number cycles count)
     //      : The highest sequence number received in an RTP data packet from source
-    // The most significant 16 bits (Highest sequence number received)
+    // - The most significant 16 bits (Highest sequence number received)
     //      : The corresponding count of sequence number cycles which may be maintained according to the algorithm in Appendix A.1.
-    // Note that different receivers within the same session will generate different extensions
-    // to the sequence number if their start times differ significantly.
+    // - Note that different receivers within the same session will generate different extensions
+    //      to the sequence number if their start times differ significantly.
     private long ehsn; // (32 bits, unsigned int)
 
     // inter-arrival Jitter
-    // An estimate of the statistical variance of the RTP data packet inter-arrival time,
-    // measured in timestamp units and expressed as an unsigned integer.
-    // the difference in the "relative transit time" for the two packets
-    // the relative transit time is the difference between a packet's RTP timestamp and
-    // the receiver's clock at the time of arrival, measured in the same units.
-    // If Si is the RTP timestamp from packet i,
+    // - An estimate of the statistical variance of the RTP data packet inter-arrival time,
+    //      measured in timestamp units and expressed as an unsigned integer.
+    // - The difference in the "relative transit time" for the two packets.
+    // - The relative transit time is the difference between a packet's RTP timestamp and
+    // - The receiver's clock at the time of arrival, measured in the same units.
+    // - If Si is the RTP timestamp from packet i,
     //      and Ri is the time of arrival in RTP timestamp units for packet i,
     //      then for two packets i and j, D may be expressed as
     //          D(i,j)=(Rj-Ri)-(Sj-Si)=(Rj-Sj)-(Ri-Si)
-    // The interarrival jitter is calculated continuously as each data packet i is received from source SSRC_n,
+    // - The interarrival jitter is calculated continuously as each data packet i is received from source SSRC_n,
     // using this difference D for that packet and the previous packet i-1 in order of arrival (not necessarily in sequence),
     // according to the formula
     //          J=J+(|D(i-1,i)|-J)/16           > Whenever a reception report is issued, the current value of J is sampled.
-    // The jitter calculation is prescribed here to allow profile-independent monitors
-    // to make valid interpretations of reports coming from different implementations.
-    // This algorithm is the optimal first- order estimator and the gain parameter 1/16
-    // gives a good noise reduction ratio while maintaining a reasonable rate of convergence [11].
-    // (A sample implementation is shown in Appendix A.8.)
-    private long j; // (32 bits, unsigned int)
+    // - The jitter calculation is prescribed here to allow profile-independent monitors
+    //      to make valid interpretations of reports coming from different implementations.
+    // - This algorithm is the optimal first- order estimator and the gain parameter 1/16
+    //      gives a good noise reduction ratio while maintaining a reasonable rate of convergence [11].
+    //      (A sample implementation is shown in Appendix A.8.)
+    // - 지터 값이 크면, 패킷 전송 불안정성이 크다는 의미이므로, 보다 큰 패킷 버퍼가 필요
+    private long iaj; // (32 bits, unsigned int)
 
     // Last SR
-    // The middle 32 bits out of 64 in the NTP timestamp (as explained in Section 4)
-    // received as part of the most recent RTCP sender report (SR) packet from source SSRC_n.
-    // If no SR has been received yet, the field is set to zero.
+    // - The middle 32 bits out of 64 in the NTP timestamp (as explained in Section 4)
+    //      received as part of the most recent RTCP sender report (SR) packet from source SSRC_n.
+    // - If no SR has been received yet, the field is set to zero.
+    // - 제일 마지막에 수신한 NTP Timestamp의 일부, 64비트의 NTP Timestamp의 제일 가운데의 32비트
     private long lsr; // (32 bits, unsigned int)
 
     // Delay since Last SR
-    // The delay, expressed in units of 1/65536 seconds,
-    // between receiving the last SR packet from source SSRC_n and sending this reception report block.
-    // If no SR packet has been received yet from SSRC_n, the DLSR field is set to zero.
+    // - The delay, expressed in units of 1/65536 seconds,
+    //      between receiving the last SR packet from source SSRC_n and sending this reception report block.
+    // - If no SR packet has been received yet from SSRC_n, the DLSR field is set to zero.
+    // - 제일 마지막에 SR을 수신한 이후의 경과 시간
     private long dlsr; // (32 bits, unsigned int)
 
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public RtcpReportBlock(long ssrc, short f, int c, long ehsn, long j, long lsr, long dlsr) {
+    public RtcpReportBlock(long ssrc, short fraction, int cnpl, long ehsn, long iaj, long lsr, long dlsr) {
         this.ssrc = (int) ssrc;
-        this.f = (byte) f;
-        this.c = c;
+        this.fraction = (byte) fraction;
+        this.cnpl = cnpl;
         this.ehsn = (int) ehsn;
-        this.j = (int) j;
+        this.iaj = (int) iaj;
         this.lsr = (int) lsr;
         this.dlsr = (int) dlsr;
     }
 
     public RtcpReportBlock() {}
 
-    private static final Logger logger = LoggerFactory.getLogger(RtcpReportBlock.class);
     public RtcpReportBlock(byte[] data) {
         if (data.length >= LENGTH) {
             int index = 0;
@@ -106,14 +106,14 @@ public class RtcpReportBlock {
             System.arraycopy(data, index, fData, 0, 1);
             byte[] fData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
             System.arraycopy(fData, 0, fData2, 1, 1);
-            f = ByteUtil.bytesToShort(fData2, true);
+            fraction = ByteUtil.bytesToShort(fData2, true);
             index += 1;
 
             byte[] cData = new byte[3];
             System.arraycopy(data, index, cData, 0, 3);
             byte[] cData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(cData, 0, cData2, 1, 3);
-            c = ByteUtil.bytesToInt(cData2, true);
+            cnpl = ByteUtil.bytesToInt(cData2, true);
             index += 3;
 
             byte[] ehsnData = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -127,7 +127,7 @@ public class RtcpReportBlock {
             System.arraycopy(data, index, jData, 0, ByteUtil.NUM_BYTES_IN_INT);
             byte[] jData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
             System.arraycopy(jData, 0, jData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
-            j = ByteUtil.bytesToLong(jData2, true);
+            iaj = ByteUtil.bytesToLong(jData2, true);
             index += ByteUtil.NUM_BYTES_IN_INT;
 
             byte[] lsrData = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -158,9 +158,9 @@ public class RtcpReportBlock {
 
         // F & C
         int fc = 0;
-        fc |= f;
+        fc |= fraction;
         fc <<= 0x24;
-        fc |= c;
+        fc |= cnpl;
         byte[] fcData = ByteUtil.intToBytes(fc, true);
         System.arraycopy(fcData, 0, data, index, fcData.length);
         index += fcData.length;
@@ -171,7 +171,7 @@ public class RtcpReportBlock {
         index += ehsnData.length;
 
         // J
-        byte[] jData = ByteUtil.intToBytes((int) j, true);
+        byte[] jData = ByteUtil.intToBytes((int) iaj, true);
         System.arraycopy(jData, 0, data, index, jData.length);
         index += jData.length;
 
@@ -187,12 +187,12 @@ public class RtcpReportBlock {
         return data;
     }
 
-    public void setData(long ssrc, byte f, int c, long ehsn, long j, long lsr, long dlsr) {
+    public void setData(long ssrc, byte fraction, int cnpl, long ehsn, long iaj, long lsr, long dlsr) {
         this.ssrc = ssrc;
-        this.f = f;
-        this.c = c;
+        this.fraction = fraction;
+        this.cnpl = cnpl;
         this.ehsn = ehsn;
-        this.j = j;
+        this.iaj = iaj;
         this.lsr = lsr;
         this.dlsr = dlsr;
     }
@@ -205,20 +205,20 @@ public class RtcpReportBlock {
         this.ssrc = ssrc;
     }
 
-    public short getF() {
-        return f;
+    public short getFraction() {
+        return fraction;
     }
 
-    public void setF(short f) {
-        this.f = f;
+    public void setFraction(short fraction) {
+        this.fraction = fraction;
     }
 
-    public int getC() {
-        return c;
+    public int getCnpl() {
+        return cnpl;
     }
 
-    public void setC(int c) {
-        this.c = c;
+    public void setCnpl(int cnpl) {
+        this.cnpl = cnpl;
     }
 
     public long getEhsn() {
@@ -229,12 +229,12 @@ public class RtcpReportBlock {
         this.ehsn = ehsn;
     }
 
-    public long getJ() {
-        return j;
+    public long getIaj() {
+        return iaj;
     }
 
-    public void setJ(long j) {
-        this.j = j;
+    public void setIaj(long iaj) {
+        this.iaj = iaj;
     }
 
     public long getLsr() {

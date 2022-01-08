@@ -2,7 +2,10 @@ package network.rtcp.packet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.base.*;
+import network.rtcp.base.RtcpFormat;
+import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpPacketPaddingResult;
+import network.rtcp.base.RtcpType;
 import network.rtcp.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,30 @@ public class RtcpPacket {
      * 3) 202 = SDES (Source Description packet)
      * 4) 203 = BYE (Goodbye packet)
      * 5) 204 = APP (Application-defined packet)
+     *
+     * - RTCP 정의
+     * 1) RTP 미디어 스트림에 관한 외부 정보의 송수신이나 제어를 하는 방법을 제공
+     * 2) 보통 RTP에서 사용하는 Transport Layer의 포트 번호보다 1 큰 포트 번호를 사용
+     *
+     * - RTCP 기능
+     * 1) 송신 미디어에 관한 정보 통지 (Sender Report)
+     * 2) 수신 미디어에 관한 통계 정보 통지 (Receiver Report)
+     * 3) 미디어 소스의 정보 통지 (Source Description)
+     * 4) 세션으로부터의 이탈 통지 (Goodbye)
+     * 5) 어플리케이션별 기능 정의 및 제공 (Application Defined)
+     *
+     * - RTCP 패킷을 통한 미디어 스트림에 관한 주요 통계 정보
+     * 1) 왕복 지연
+     *      - Tr : 수신 시각을 NTP Timestamp 로서 취득 > 중앙의 32 비트를 Tr 로 정의
+     *      - Lsr : 송신 시각을 NTP Timestamp 로서 취득 > 중앙의 32 비트를 Lsr 로 정의
+     *      - Dlsr : 가장 마지막 SR 패킷을 받은 이후 경과 시간 > 32 비트 Timestamp 을 Dslr 로 정의
+     *      - 왕복 지연 시간(추정 시간) = Tr - Lsr - Dlsr
+     * 2) 패킷 수신 간격 지터 (불안정성, 편차, 패킷 간의 간격이 일정하지 않는 현상)
+     * 3) 패킷 손실
+     *
+     * - 주의 사항
+     * 1) RTCP 자신의 패킷에 따라 RTP 미디어 스트림의 패킷 송수신의 품질에 영향을 주지 않도록 주의할 필요가 있다.
+     *      - RTCP 패킷이 RTP 미디어 스트림 패킷에 대해서 점유하는 비율은 최대 5%까지로 하는 것을 추천
      */
 
     ////////////////////////////////////////////////////////////

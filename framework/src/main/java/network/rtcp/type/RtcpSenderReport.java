@@ -49,12 +49,26 @@ public class RtcpSenderReport extends RtcpFormat {
     // VARIABLES
     public static final int MIN_LENGTH = 20; // bytes
 
-    // The npt timestamp that indicates the point of time measured
-    // in wall clock time when this report was sent.
-    // In combination with timestamps returned in reception reports from the respective receivers,
-    // it can be used to estimate the round-trip propagation time to and from the receivers.
-    private long mswNts = 0; // Most Significant Word Ntp TimeStamp (32 bits)
-    private long lswNts = 0; // Least Significant Word Ntp TimeStamp (32 bits)
+    // - The npt timestamp that indicates the point of time measured in wall clock time when this report was sent.
+    // - In combination with timestamps returned in reception reports from the respective receivers,
+    // - it can be used to estimate the round-trip propagation time to and from the receivers.
+    // - 1900/1/1 을 기준으로 계산
+    // - NTP 타임스탬프는 RFC 1305에서 규정되어 있는 NTP에서 네트워크 상의 서버로부터 시간 정보를 얻을 때에 이용되고 있는 64비트 길이의 시간 포맷을 사용
+    // - 32비트로 표현할 수 있는 2^32초는 약 136년에 해당하기 때문에, NTP 타임스탬프는 2036년에는 overflow하지만,
+    //      RTP/RTCP에 있어서는 프로토콜 동작 상으로는 상대적으로 관계만이 중요하기 때문에 적절하게 overflow를 고려해서 구현한 시스템에 있어서는, 2036년 에도 논리 상으로는 문제가 되지 않는다.
+    //      또한, RTP/RTCP의 시스템에서는, NTP 타임스탬프의 64비트 전부를 이용하는 것이 아니고,
+    //      정수 부분의 하위 16비트와 소수 부분의 상위 16비트분의 총 32비티를 상대적인 시간을 계산하는데 이용한다.
+    //      왕복 지연 시간의 계측에 이용되는 SR 패킷 및 RR 패킷의 레포트 블록에 포함된 LSR이나 DSLR에서는, 이 32비트의 포맷이 이용된다.
+    // - NTP는 네트워크상의 시간 관리 서버로부터 시간 정보를 얻는 것으로, 시스템 시간을 절대 시간에 동기화시키는 것이 가능하지만,
+    //      RTP/RTCP의 시스템은 반드시, NTP를 동작 시킬 필요는 없다.
+    //      시스템의 기동으로부터의 경과 시간을 NTP 타임스탬프와 동일한 스케줄로 사용하는 것으로,
+    //      RTP/RTCP가 제공하는 왕복 지원의 측정이나,미디어간의 동기당의 기능을 이용할 수 있다.
+    //      그러나, 다른 시스템 사이에서의 정도가 높은 동기화를 취할 필요가 있는 경우에는 NTP에서 제공된 절대 시간을 이용하는 것이 하나의 방법으로서 유효하다.
+    // - 또한, 상대 시간도 포함해서 RTP/RTCP를 이용하는 시스템에 있어서 모든 블록의 관리를 하지 않는 경우도, RTP/RTCP를 이용하는 것이 가능하다.
+    //      이 경우에는 NTP 타임 스탬프에 있는 부분에는 "0"을 설정하게 된다.
+    //      다만, 클록을 이용하지 않는 경우에는, 미디어 스트림간의 동기나, 왕복지연 시간의 측정등의 기능을 이용할 수 없다.
+    private long mswNts = 0; // Most Significant Word Ntp TimeStamp (32 bits) > 상위 비트가 경과한 초의 정수부를 표현
+    private long lswNts = 0; // Least Significant Word Ntp TimeStamp (32 bits) > 하위 32비트가 소수점 이하의 초를 1/2^32 초의 단위로 표현
 
     // The RTP timestamp resembles the same time as the NTP timestamp (above),
     // but is measured in the same units and with the same random offset
@@ -105,7 +119,7 @@ public class RtcpSenderReport extends RtcpFormat {
             int index = 0;
             rtcpReportBlockList = null;
 
-            // NTS > TimeStamp.getCurrentTime().getTime()
+            // NTS
             byte[] mswNtsData = new byte[ByteUtil.NUM_BYTES_IN_INT];
             System.arraycopy(data, index, mswNtsData, 0, ByteUtil.NUM_BYTES_IN_INT);
             byte[] mswNtsData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];

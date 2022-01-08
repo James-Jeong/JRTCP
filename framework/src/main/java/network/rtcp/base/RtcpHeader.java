@@ -35,11 +35,13 @@ public class RtcpHeader {
     // - In a compound RTCP packet, padding should only be required on
     // the last individual packet because the compound packet is encrypted as a whole.
     private int padding = 0; // (1 bit)
-    private int paddingBytes = 0;
+    transient private int paddingBytes = 0;
 
     // Resource count
-    // - The number of reception report blocks contained in this packet.
+    // 1) The number of reception report blocks contained in this packet.
     //      A value of zero is valid.
+    // 2) The number of SSRC/CSRC chunks contained in this SDES packet.
+    //      A value of zero is valid but useless.
     private int resourceCount = 0; // (5 bits)
 
     // PACKET TYPE
@@ -68,7 +70,7 @@ public class RtcpHeader {
     private int length = 0; // (16 bits)
 
     // SSRC
-    // The synchronization source identifier for the originator of this SR packet.
+    // - The synchronization source identifier for the originator of this SR packet.
     private long ssrc = 0; // (32 bits)
     ////////////////////////////////////////////////////////////
 

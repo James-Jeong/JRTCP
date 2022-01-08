@@ -4,11 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpFormat;
 import network.rtcp.type.base.sdes.SdesChunk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RtcpSourceDescription extends RtcpFormat {
+
+    private static final Logger logger = LoggerFactory.getLogger(RtcpSourceDescription.class);
 
     /**
      *  0                   1                   2                   3
@@ -64,33 +68,39 @@ public class RtcpSourceDescription extends RtcpFormat {
         if (dataLength > 0) {
             int index = 0;
             sdesChunkList = new ArrayList<>();
-            List<Integer> chunkPositionList = new ArrayList<>();
+            List<Integer> chunkEndPositionList = new ArrayList<>();
+            List<Integer> chunkStartPositionList = new ArrayList<>();
+            chunkStartPositionList.add(0);
+
             for (int i = index; i < dataLength; i++) {
                 if (data[i] == 0) {
-                    chunkPositionList.add(i);
+                    chunkEndPositionList.add(i);
+
+                    if ((i + 1) < dataLength) { // 다음 청크가 없으면 start position 을 체크하지 않는다.
+                        for (int j = i + 1; j < dataLength; j++) {
+                            if (data[j] != 0) {
+                                chunkStartPositionList.add(j);
+                                break;
+                            }
+                            i++;
+                        }
+                    }
                 }
             }
 
-            int chunkCount = chunkPositionList.size();
+            int chunkCount = chunkEndPositionList.size();
             if (chunkCount > CHUNK_LIMIT) {
                 chunkCount = CHUNK_LIMIT;
             }
 
             int curChunkDataLength;
             for (int i = 0; i < chunkCount; i++) {
-                if (i > 0) {
-                    curChunkDataLength = chunkPositionList.get(i) - chunkPositionList.get(i - 1);
-                } else {
-                    curChunkDataLength = chunkPositionList.get(i) + 1;
-                }
-
+                curChunkDataLength = chunkEndPositionList.get(i) - chunkStartPositionList.get(i) + 1;
                 if (curChunkDataLength > 0) {
                     byte[] curChunkData = new byte[curChunkDataLength];
-                    System.arraycopy(data, index, curChunkData, 0, curChunkDataLength);
+                    System.arraycopy(data, chunkStartPositionList.get(i), curChunkData, 0, curChunkDataLength);
                     index += curChunkDataLength;
-                    if (curChunkData[0] == 0) {
-                        break;
-                    }
+                    if (curChunkData[0] == 0) { break; }
 
                     SdesChunk sdesChunk = new SdesChunk(curChunkData);
                     sdesChunkList.add(sdesChunk);

@@ -4,11 +4,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
-import network.rtcp.RtcpTest;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.base.RtcpType;
-import network.rtcp.packet.RtcpCompoundPacket;
-import network.rtcp.packet.RtcpPacket;
+import network.rtcp.packet.rtcp.RtcpCompoundPacket;
+import network.rtcp.packet.rtcp.RtcpPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,9 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
                 // 맨 처음 헤더 읽어서 길이 알아내서 해당 바이트 수 만큼 읽기
                 int loopCount = 0;
                 int totalRemainDataLength;
+                RtcpPacket firstRtcpPacket = null;
                 List<RtcpPacket> rtcpPacketList = null;
+
                 while (true) {
                     totalRemainDataLength = readableBytes - index;
                     logger.debug("[RtcpServerHandler<{}>] remainDataLength: [{}], index: [{}]", id, totalRemainDataLength, index);
@@ -82,10 +83,17 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
                             RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData)
                     );
 
-                    if (rtcpPacketList == null) {
-                        rtcpPacketList = new ArrayList<>();
+                    if (loopCount > 0) {
+                        if (rtcpPacketList == null) {
+                            rtcpPacketList = new ArrayList<>();
+                            rtcpPacketList.add(firstRtcpPacket);
+                        }
+                        rtcpPacketList.add(rtcpPacket);
                     }
-                    rtcpPacketList.add(rtcpPacket);
+
+                    if (loopCount == 0) {
+                        firstRtcpPacket = rtcpPacket;
+                    }
 
                     logger.debug("[RtcpServerHandler<{}>] RtcpPacket: (size={}+{})\n{}", id, headerData.length, curRemainDataLength, rtcpPacket);
                     loopCount++;
