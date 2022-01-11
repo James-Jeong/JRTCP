@@ -1,12 +1,22 @@
 # JRTCP
-## RTCP Module
+## RTCP Module (Stack)
+~~~
+1) Netty 사용
+2) RTP 기반 테스트 활용
+3) Single or Compound 패킷 테스트 가능 (by wireshark)
+4) Restcomm 오픈 소스 활용
+~~~
 
 ### Reference
+#### 규격
 https://www4.cs.fau.de/Projects/JRTP/pmt/node82.html
   
 https://www.freesoft.org/CIE/RFC/1889/13.htm
   
 https://datatracker.ietf.org/doc/html/rfc1889
+  
+#### 오픈 소스
+https://github.com/RestComm/media-core
   
 ### Example
 #### Single packet
