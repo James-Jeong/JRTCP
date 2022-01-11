@@ -23,7 +23,8 @@ public class RtcpSenderReportTest {
     }
 
     private byte[] creationTest() {
-        long curTime = TimeStamp.getCurrentTime().getTime();
+        long curSeconds = TimeStamp.getCurrentTime().getSeconds();
+        long curFraction = TimeStamp.getCurrentTime().getFraction();
         long rtpTimeStamp = 250880;
 
         // REPORT BLOCK LIST
@@ -31,14 +32,14 @@ public class RtcpSenderReportTest {
         RtcpReportBlock source1 = new RtcpReportBlock(
                 1569920308, (byte) 0, 1,
                 50943, 76,
-                curTime, 35390
+                curSeconds, 35390
         );
         rtcpReportBlockList.add(source1);
 
         // RtcpSenderReport
         RtcpSenderReport rtcpSenderReport = new RtcpSenderReport(
-                System.currentTimeMillis(),
-                curTime, rtpTimeStamp,
+                curSeconds,
+                curFraction, rtpTimeStamp,
                 1568, 2508,
                 rtcpReportBlockList,
                 null

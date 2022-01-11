@@ -296,14 +296,18 @@ public class RtcpUnit {
         }
 
         this.jitter += d - ((this.jitter + 8) >> 4);
-        logger.debug("[estimateJitter] transitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}", transitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp());
+
+        /*logger.debug("[estimateJitter] transitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}", transitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp());
         logger.debug("[estimateJitter] d: {}, transitDelay: {}, this.currentTransitDelay: {}", d, transitDelay, this.currentTransitDelay);
-        logger.debug("[estimateJitter] currentTransitDelay: {}, jitter: {}", currentTransitDelay, jitter);
+        logger.debug("[estimateJitter] currentTransitDelay: {}, jitter: {}", currentTransitDelay, jitter);*/
     }
 
     private void initJitter(RtpPacket packet) {
         this.currentTransitDelay = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
-        logger.debug("[initJitter] currentTransitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}", currentTransitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp());
+
+        /*logger.debug("[initJitter] currentTransitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}",
+                currentTransitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp()
+        );*/
     }
 
     public void estimateRtt(long receiptDate, long lastSR, long delaySinceSR) {
@@ -311,6 +315,7 @@ public class RtcpUnit {
         long receiptNtpTime = NtpUtils.calculateLastSrTimestamp(receiptNtp.getSeconds(), receiptNtp.getFraction());
         long delay = receiptNtpTime - lastSR - delaySinceSR;
         this.roundTripDelay = (delay > 4294967L) ? RTP_SEQ_MOD : (int) ((delay * 1000L) >> 16);
+
         /*if (logger.isTraceEnabled()) {
             logger.trace("rtt=" + receiptNtpTime + " - " + lastSR + " - " + delaySinceSR + " = " + delay + " => "
                     + this.roundTripDelay + "ms");

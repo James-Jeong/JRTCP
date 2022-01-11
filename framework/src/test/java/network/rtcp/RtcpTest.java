@@ -20,7 +20,6 @@ import network.socket.GroupSocket;
 import network.socket.SocketManager;
 import network.socket.SocketProtocol;
 import network.socket.netty.NettyChannel;
-import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,9 +35,9 @@ public class RtcpTest {
 
     @Test
     public void test() {
-        //singleRtcpPacketTest();
+        singleRtcpPacketTest();
         //multiRtcpPacketTest();
-        rtpStatisticsTest();
+        //rtpStatisticsTest();
     }
 
     public void singleRtcpPacketTest() {
@@ -98,7 +97,7 @@ public class RtcpTest {
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
-        // TODO RTCP 송수신
+        // RTCP 송수신
         DestinationRecord destinationRecord = groupSocket1.getDestination(sessionId);
         Assert.assertNotNull(destinationRecord);
         NettyChannel nettyChannel = destinationRecord.getNettyChannel();
@@ -249,7 +248,8 @@ public class RtcpTest {
         ////////////////////////////////////////////////////////////
         // RtcpUnit 생성
         int timeDelay = 20; // ms
-        RtpClock rtpClock = new RtpClock(new MockWallClock());
+        MockWallClock mockWallClock = new MockWallClock();
+        RtpClock rtpClock = new RtpClock(mockWallClock);
         rtpClock.setClockRate(1000);
 
         RtcpUnit rtcpUnit = new RtcpUnit(
@@ -296,6 +296,7 @@ public class RtcpTest {
                 rtcpUnit.onReceiveRtp(rtpPacket);
                 baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] onReceiveRtp [RtpPacket:\n%s] \nRtcpUnit: \n%s", rtpPacket, rtcpUnit);
                 timeUnit.sleep(timeDelay);
+                mockWallClock.tick(timeDelay * 1000000); // 1 Milliseconds = 1000000 Nanoseconds
                 i++;
             }
         } catch (Exception e) {
