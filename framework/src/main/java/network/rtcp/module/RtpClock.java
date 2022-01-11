@@ -7,19 +7,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class RtpClock {
 
-    //absolute time clock
+    // Absolute time clock
     private final Clock wallClock;
 
-    //the clock rate measured in Hertz.
-    private int clockRate;
-    private int scale;
+    // The clock rate measured in Hertz.
+    private int clockRate = 0;
+    private int scale = 0;
 
-    //the difference between media time measured by local and remote clock
-    protected long drift;
+    // The difference between media time measured by local and remote clock
+    protected long drift = 0;
 
-    //the flag indicating the state of relation between local and remote clocks
-    //the flag value is true if relation established
-    private boolean isSynchronized;
+    // The flag indicating the state of relation between local and remote clocks
+    // The flag value is true if relation established
+    private boolean isSynchronized = false;
 
     public RtpClock(Clock wallClock) {
         this.wallClock = wallClock;
@@ -31,7 +31,7 @@ public class RtpClock {
 
     public void setClockRate(int clockRate) {
         this.clockRate = clockRate;
-        this.scale = clockRate/1000;
+        this.scale = clockRate / 1000;
     }
 
     public int getClockRate() {

@@ -1,5 +1,7 @@
 package network.rtp;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import util.module.ByteUtil;
 
 import java.io.Serializable;
@@ -118,7 +120,7 @@ public class RtpPacket implements Serializable {
     /** The payload.
      * Using for application/sdp
      */
-    private byte[] payload = null;
+    transient private byte[] payload = null;
 
     /** The length of the payload.
      * Using for application/sdp
@@ -515,21 +517,10 @@ public class RtpPacket implements Serializable {
         return payloadLength;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-
     @Override
     public String toString() {
-        return "RtpPacket{" +
-                "version=" + version +
-                ", padding=" + padding +
-                ", extension=" + extension +
-                ", csrc=" + csrc +
-                ", marker=" + marker +
-                ", payloadType=" + payloadType +
-                ", seqNum=" + seqNum +
-                ", timeStamp=" + timeStamp +
-                ", ssrc=" + ssrc +
-                ", payloadLength=" + payloadLength +
-                '}';
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////////////////////////
 }

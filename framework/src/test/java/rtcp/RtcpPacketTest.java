@@ -3,7 +3,7 @@ package rtcp;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.base.RtcpPacketPaddingResult;
 import network.rtcp.base.RtcpType;
-import network.rtcp.packet.rtcp.RtcpPacket;
+import network.rtcp.packet.RtcpPacket;
 import network.rtcp.type.RtcpBye;
 import network.rtcp.type.RtcpSenderReport;
 import network.rtcp.type.RtcpSourceDescription;

@@ -9,26 +9,36 @@ import network.definition.DestinationRecord;
 import network.definition.NetAddress;
 import network.rtcp.handler.RtcpClientHandler;
 import network.rtcp.handler.RtcpServerHandler;
-import network.rtcp.packet.rtcp.RtcpCompoundPacket;
-import network.rtcp.packet.rtcp.RtcpPacket;
+import network.rtcp.module.CnameGenerator;
+import network.rtcp.module.MockWallClock;
+import network.rtcp.module.RtpClock;
+import network.rtcp.packet.RtcpCompoundPacket;
+import network.rtcp.packet.RtcpPacket;
+import network.rtcp.unit.RtcpUnit;
+import network.rtp.RtpPacket;
 import network.socket.GroupSocket;
 import network.socket.SocketManager;
 import network.socket.SocketProtocol;
 import network.socket.netty.NettyChannel;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Assert;
 import org.junit.Test;
 import rtcp.RtcpPacketTest;
 import service.ResourceManager;
 import service.scheduler.schedule.ScheduleManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RtcpTest {
 
     @Test
     public void test() {
-        singleRtcpPacketTest();
-        multiRtcpPacketTest();
+        //singleRtcpPacketTest();
+        //multiRtcpPacketTest();
+        rtpStatisticsTest();
     }
 
     public void singleRtcpPacketTest() {
@@ -218,6 +228,81 @@ public class RtcpTest {
         // 인스턴스 삭제
         baseEnvironment.stop();
         ////////////////////////////////////////////////////////////
+    }
+
+    public void rtpStatisticsTest() {
+        ////////////////////////////////////////////////////////////
+        // 인스턴스 생성
+        BaseEnvironment baseEnvironment = new BaseEnvironment(
+                new ScheduleManager(),
+                new ResourceManager(5000, 7000),
+                DebugLevel.DEBUG
+        );
+        ////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////
+        // CNAME 생성
+        String cname = CnameGenerator.generateCname();
+        baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] CNAME: [%s]", cname);
+        ////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////
+        // RtcpUnit 생성
+        int timeDelay = 20; // ms
+        RtpClock rtpClock = new RtpClock(new MockWallClock());
+        rtpClock.setClockRate(1000);
+
+        RtcpUnit rtcpUnit = new RtcpUnit(
+                rtpClock,
+                1569920308,
+                cname
+        );
+        baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] RtcpUnit: \n%s", rtcpUnit);
+        ////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////
+        // RtpPacket 생성
+        int packetCount = 10;
+        byte[] data = { 0x01, 0x02, 0x03, 0x04 };
+        long curTime = TimeStamp.getCurrentTime().getSeconds();
+
+        List<RtpPacket> rtpPacketList = new ArrayList<>();
+        for (int i = 0 ; i < packetCount; i++) {
+            RtpPacket rtpPacket = new RtpPacket();
+            rtpPacket.setValue(
+                    2, 0, 0, 0, 0, 8,
+                    i + 1,
+                    curTime,
+                    1569920308,
+                    data,
+                    data.length
+            );
+            rtpPacketList.add(rtpPacket);
+            //baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] RtpPacket-%s: \n%s", i + 1, rtpPacket);
+            curTime += timeDelay;
+        }
+        ////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////
+        // RTP 통계 처리
+        TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+
+        try {
+            int i = 0;
+            for (RtpPacket rtpPacket : rtpPacketList) {
+                if (i == 0) {
+                    rtpClock.synchronize(rtpPacket.getTimeStamp());
+                }
+                rtcpUnit.onReceiveRtp(rtpPacket);
+                baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] onReceiveRtp [RtpPacket:\n%s] \nRtcpUnit: \n%s", rtpPacket, rtcpUnit);
+                timeUnit.sleep(timeDelay);
+                i++;
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        ////////////////////////////////////////////////////////////
+
     }
 
 }

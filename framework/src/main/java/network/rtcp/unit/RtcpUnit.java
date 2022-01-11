@@ -1,5 +1,7 @@
 package network.rtcp.unit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import network.rtcp.module.Clock;
 import network.rtcp.module.NtpUtils;
 import network.rtcp.module.RtpClock;
@@ -19,25 +21,35 @@ public class RtcpUnit {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
+    // RTP SEQUENCE NUMBER MOD NUMBER (MAX(LIMIT) NUMBER)
     public static final int RTP_SEQ_MOD = 65536;
+
+    // 현재 패킷보다 다음 패킷의 SEQ_NUM 가 MAX_DROPOUT 값 이상 차이나면 DROP
     public static final int MAX_DROPOUT = 100;
+
+    // 패킷 순서 오류로 판단 가능한 THRESHOLD 최대값
+    // - RTP_SEQ_MOD 값에서 MAX_MISORDER 값을 뺀 값이 패킷 순서 오류로 판단 가능한 SEQ_NUM 범위 최대값
+    // - SEQ_NUM 가 이 범위 안에 있으면, badSequence 값 지정
     public static final int MAX_MISORDER = 100;
+
+    // RTP SEQ_NUM THRESHOLD 최소값
+    // > 2개 이상의 RTP Packet 수신 시점부터 통계 계산
     public static final int MIN_SEQUENTIAL = 2;
 
-    // Core elements
+    // CLOCKS
     private final RtpClock rtpClock;
     private final Clock wallClock;
 
-    // Member data
+    // IDENTIFIERS
     private long ssrc;
     private String cname;
 
-    // Packet stats
+    // PACKET STATISTICS
     private long receivedPackets;
     private long receivedOctets;
     private long receivedSinceSR;
     private int roundTripDelay;
-    private long lastPacketReceivedOn;
+    private long lastPacketOnReceivedTime;
     private int firstSequenceNumber;
     private int highestSequence;
     private int sequenceCycle;
@@ -46,15 +58,13 @@ public class RtcpUnit {
     private long receivedPrior;
     private long expectedPrior;
 
-    // Jitter
-    /**
-     * Measures the relative time it takes for an RTP packet to arrive from the remote server to MMS.<br>
-     * Used to calculate network jitter.
-     */
+    // JITTER
+    // - Measures the relative time it takes for an RTP packet to arrive from the remote server to MMS.
+    // - Used to calculate network jitter.
     private long currentTransitDelay;
     private long jitter;
 
-    // SR
+    // SenderReport
     private long lastSrTimestamp;
     private long lastSrReceivedOn;
     ////////////////////////////////////////////////////////////
@@ -62,20 +72,14 @@ public class RtcpUnit {
     ////////////////////////////////////////////////////////////
     // CONSTRUCTOR
     public RtcpUnit(RtpClock clock, long ssrc, String cname) {
-        // Core elements
         this.rtpClock = clock;
         this.wallClock = clock.getWallClock();
-
-        // Member data
         this.ssrc = ssrc;
         this.cname = cname;
-
-        // Packet stats
         this.receivedPackets = 0;
         this.receivedOctets = 0;
         this.receivedSinceSR = 0;
-        this.lastPacketReceivedOn = -1;
-
+        this.lastPacketOnReceivedTime = -1;
         this.firstSequenceNumber = -1;
         this.highestSequence = 0;
         this.badSequence = 0;
@@ -83,12 +87,8 @@ public class RtcpUnit {
         this.probation = 0;
         this.receivedPrior = 0;
         this.expectedPrior = 0;
-
-        // Jitter
         this.currentTransitDelay = 0;
         this.jitter = -1;
-
-        // RTCP
         this.lastSrTimestamp = 0;
         this.lastSrReceivedOn = 0;
         this.roundTripDelay = 0;
@@ -149,12 +149,12 @@ public class RtcpUnit {
         this.roundTripDelay = roundTripDelay;
     }
 
-    public long getLastPacketReceivedOn() {
-        return lastPacketReceivedOn;
+    public long getLastPacketOnReceivedTime() {
+        return lastPacketOnReceivedTime;
     }
 
-    public void setLastPacketReceivedOn(long lastPacketReceivedOn) {
-        this.lastPacketReceivedOn = lastPacketReceivedOn;
+    public void setLastPacketOnReceivedTime(long lastPacketOnReceivedTime) {
+        this.lastPacketOnReceivedTime = lastPacketOnReceivedTime;
     }
 
     public int getFirstSequenceNumber() {
@@ -296,10 +296,14 @@ public class RtcpUnit {
         }
 
         this.jitter += d - ((this.jitter + 8) >> 4);
+        logger.debug("[estimateJitter] transitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}", transitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp());
+        logger.debug("[estimateJitter] d: {}, transitDelay: {}, this.currentTransitDelay: {}", d, transitDelay, this.currentTransitDelay);
+        logger.debug("[estimateJitter] currentTransitDelay: {}, jitter: {}", currentTransitDelay, jitter);
     }
 
     private void initJitter(RtpPacket packet) {
         this.currentTransitDelay = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
+        logger.debug("[initJitter] currentTransitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}", currentTransitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp());
     }
 
     public void estimateRtt(long receiptDate, long lastSR, long delaySinceSR) {
@@ -307,10 +311,12 @@ public class RtcpUnit {
         long receiptNtpTime = NtpUtils.calculateLastSrTimestamp(receiptNtp.getSeconds(), receiptNtp.getFraction());
         long delay = receiptNtpTime - lastSR - delaySinceSR;
         this.roundTripDelay = (delay > 4294967L) ? RTP_SEQ_MOD : (int) ((delay * 1000L) >> 16);
-        if (logger.isTraceEnabled()) {
+        /*if (logger.isTraceEnabled()) {
             logger.trace("rtt=" + receiptNtpTime + " - " + lastSR + " - " + delaySinceSR + " = " + delay + " => "
                     + this.roundTripDelay + "ms");
-        }
+        }*/
+        logger.debug("rtt=" + receiptNtpTime + " - " + lastSR + " - " + delaySinceSR + " = " + delay + " => "
+                + this.roundTripDelay + "ms");
     }
 
     private void initSequence(int sequence) {
@@ -364,10 +370,10 @@ public class RtcpUnit {
                 this.badSequence = (sequence + 1) & (RTP_SEQ_MOD - 1);
                 return false;
             }
-        }
-        /*else {
+        } else {
             // duplicate or reordered packet
-        }*/
+            logger.warn("duplicate or reordered packet");
+        }
         return true;
     }
 
@@ -377,12 +383,12 @@ public class RtcpUnit {
             this.receivedPackets++;
             this.receivedOctets += packet.getPayloadLength();
 
-            if (this.lastPacketReceivedOn > 0) {
+            if (this.lastPacketOnReceivedTime > 0) {
                 estimateJitter(packet);
             } else {
                 initJitter(packet);
             }
-            this.lastPacketReceivedOn = rtpClock.getLocalRtpTime();
+            this.lastPacketOnReceivedTime = rtpClock.getLocalRtpTime();
         }
     }
 
@@ -410,6 +416,11 @@ public class RtcpUnit {
         this.receivedSinceSR = 0;
     }
 
+    @Override
+    public String toString() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
     ////////////////////////////////////////////////////////////
 
 }

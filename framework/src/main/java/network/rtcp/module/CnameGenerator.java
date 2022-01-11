@@ -9,6 +9,12 @@ import java.util.UUID;
  */
 public class CnameGenerator {
 
+    // Canonical Name
+    // - A canonical name is the properly denoted host name of a computer or network server.
+    // - A CNAME specifies an alias or nickname for a canonical host name record in a domain name system (DNS) database.
+    // - In programming, the term "canonical" means "according to the rules."
+    // - The DNS is the standard method of defining the locations of sites on the Internet, particularly Web-sites.
+
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
     public static String generateCname() {

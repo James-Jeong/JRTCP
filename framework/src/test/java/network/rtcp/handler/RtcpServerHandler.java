@@ -6,8 +6,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.base.RtcpType;
-import network.rtcp.packet.rtcp.RtcpCompoundPacket;
-import network.rtcp.packet.rtcp.RtcpPacket;
+import network.rtcp.packet.RtcpCompoundPacket;
+import network.rtcp.packet.RtcpPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
