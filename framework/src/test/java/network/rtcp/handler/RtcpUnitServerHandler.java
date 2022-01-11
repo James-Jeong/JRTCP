@@ -233,7 +233,6 @@ public class RtcpUnitServerHandler extends SimpleChannelInboundHandler<DatagramP
                     destinationRecord.getGroupEndpointId().getGroupAddress().getPort()
             );
             nettyChannel.sendData(rtcpPacketData, rtcpPacketData.length);
-            logger.debug("@@@ [{}]", rtcpPacketData.length);
         }
         //
         ////////////////////////////////////////////////////////////

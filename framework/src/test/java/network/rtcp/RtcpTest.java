@@ -42,12 +42,13 @@ import java.util.concurrent.TimeUnit;
 public class RtcpTest {
 
     private static final long SESSION_ID = 1234;
+    private static final byte[] RTP_DATA = { 0x01, 0x02, 0x03, 0x04 };
 
     @Test
     public void test() {
-        //singleRtcpPacketTest();
-        //multiRtcpPacketTest();
-        //rtpStatisticsRecvTest();
+        singleRtcpPacketTest();
+        multiRtcpPacketTest();
+        rtpStatisticsRecvTest();
         rtpStatisticsSendRecvTest();
     }
 
@@ -459,7 +460,6 @@ public class RtcpTest {
         ////////////////////////////////////////////////////////////
         // RtpPacket 생성 for sender
         int packetCount = 10;
-        byte[] data = { 0x01, 0x02, 0x03, 0x04 };
         long curTime = TimeStamp.getCurrentTime().getSeconds();
 
         List<RtpPacket> rtpPacketList = new ArrayList<>();
@@ -470,8 +470,8 @@ public class RtcpTest {
                     i + 1,
                     curTime,
                     ssrc,
-                    data,
-                    data.length
+                    RTP_DATA,
+                    RTP_DATA.length
             );
             rtpPacketList.add(rtpPacket);
             //baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] RtpPacket-%s: \n%s", i + 1, rtpPacket);
@@ -559,7 +559,7 @@ public class RtcpTest {
                 }
                 mockWallClock1.tick(timeDelay * 1000000); // 1 Milliseconds = 1000000 Nanoseconds
                 curPacketCount++;
-                curOctetCount += data.length;
+                curOctetCount += RTP_DATA.length;
                 ////////////////////////////////////////////////////////////
 
                 ////////////////////////////////////////////////////////////
