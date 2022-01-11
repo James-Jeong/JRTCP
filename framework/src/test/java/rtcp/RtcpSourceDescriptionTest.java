@@ -1,5 +1,7 @@
 package rtcp;
 
+import network.rtcp.module.SsrcGenerator;
+import network.rtcp.type.RtcpSenderReport;
 import network.rtcp.type.RtcpSourceDescription;
 import network.rtcp.type.base.sdes.SdesChunk;
 import network.rtcp.type.base.sdes.SdesItem;
@@ -19,14 +21,16 @@ public class RtcpSourceDescriptionTest {
 
     @Test
     public void test() {
-        byte[] data1 = creationTest();
+        long ssrc = SsrcGenerator.generateSsrc();
+
+        byte[] data1 = creationTest(ssrc);
         getTest(data1);
 
         byte[] data2 = multiChunkTest();
         getTest(data2);
     }
 
-    private byte[] creationTest() {
+    private byte[] creationTest(long ssrc) {
         // SDES CHUNK LIST
         List<SdesChunk> sdesChunkList = new ArrayList<>();
 
@@ -39,7 +43,7 @@ public class RtcpSourceDescriptionTest {
         chunk1SdesItemList.add(chunk1SdesItem2);
         chunk1SdesItemList.add(chunk1SdesItem3);
         SdesChunk sdesChunk1 = new SdesChunk(
-                1569920308,
+                ssrc,
                 chunk1SdesItemList
         );
         sdesChunkList.add(sdesChunk1);
@@ -69,8 +73,10 @@ public class RtcpSourceDescriptionTest {
         chunk1SdesItemList.add(chunk1SdesItem2);
         chunk1SdesItemList.add(chunk1SdesItem3);
         chunk1SdesItemList.add(chunk1SdesItem4);
+
+        long ssrc1 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk1 = new SdesChunk(
-                1569920308,
+                ssrc1,
                 chunk1SdesItemList
         );
         sdesChunkList.add(sdesChunk1);
@@ -85,8 +91,10 @@ public class RtcpSourceDescriptionTest {
         chunk2SdesItemList.add(chunk2SdesItem2);
         chunk2SdesItemList.add(chunk2SdesItem3);
         chunk2SdesItemList.add(chunk2SdesItem4);
+
+        long ssrc2 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk2 = new SdesChunk(
-                26422708,
+                ssrc2,
                 chunk2SdesItemList
         );
         sdesChunkList.add(sdesChunk2);
@@ -99,8 +107,10 @@ public class RtcpSourceDescriptionTest {
         chunk3SdesItemList.add(chunk3SdesItem1);
         chunk3SdesItemList.add(chunk3SdesItem2);
         chunk3SdesItemList.add(chunk3SdesItem3);
+
+        long ssrc3 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk3 = new SdesChunk(
-                328590819,
+                ssrc3,
                 chunk3SdesItemList
         );
         sdesChunkList.add(sdesChunk3);
@@ -116,7 +126,8 @@ public class RtcpSourceDescriptionTest {
     }
 
     private void getTest(byte[] data) {
-
+        RtcpSourceDescription rtcpSourceDescription = new RtcpSourceDescription(data);
+        logger.debug("[RtcpSourceDescriptionTest][getTest] RtcpSourceDescription: \n{}", rtcpSourceDescription);
     }
 
 }

@@ -33,7 +33,7 @@ public class RtcpUnit {
     public static final int MAX_MISORDER = 100;
 
     // RTP SEQ_NUM THRESHOLD 최소값
-    // > 2개 이상의 RTP Packet 수신 시점부터 통계 계산
+    // - 2개 이상의 RTP Packet 수신 시점부터 통계 계산
     public static final int MIN_SEQUENTIAL = 2;
 
     // CLOCKS
@@ -61,11 +61,12 @@ public class RtcpUnit {
     // JITTER
     // - Measures the relative time it takes for an RTP packet to arrive from the remote server to MMS.
     // - Used to calculate network jitter.
-    private long currentTransitDelay;
+    private long currentTransitDelayTime;
     private long jitter;
 
     // SenderReport
     private long lastSrTimestamp;
+    private long delaySincelastSrTimestamp;
     private long lastSrReceivedOn;
     ////////////////////////////////////////////////////////////
 
@@ -87,9 +88,10 @@ public class RtcpUnit {
         this.probation = 0;
         this.receivedPrior = 0;
         this.expectedPrior = 0;
-        this.currentTransitDelay = 0;
+        this.currentTransitDelayTime = 0;
         this.jitter = -1;
         this.lastSrTimestamp = 0;
+        this.delaySincelastSrTimestamp = 0;
         this.lastSrReceivedOn = 0;
         this.roundTripDelay = 0;
     }
@@ -209,12 +211,12 @@ public class RtcpUnit {
         this.expectedPrior = expectedPrior;
     }
 
-    public long getCurrentTransitDelay() {
-        return currentTransitDelay;
+    public long getCurrentTransitDelayTime() {
+        return currentTransitDelayTime;
     }
 
-    public void setCurrentTransitDelay(long currentTransitDelay) {
-        this.currentTransitDelay = currentTransitDelay;
+    public void setCurrentTransitDelayTime(long currentTransitDelayTime) {
+        this.currentTransitDelayTime = currentTransitDelayTime;
     }
 
     public long getJitter() {
@@ -247,6 +249,10 @@ public class RtcpUnit {
 
     public long getPacketsExpected() {
         return getExtHighSequence() - this.firstSequenceNumber + 1;
+    }
+
+    public long getCumulativeNumberOfPacketsLost() {
+        return getPacketsExpected() - this.receivedPackets;
     }
 
     public long getFractionLost() {
@@ -287,9 +293,9 @@ public class RtcpUnit {
     }
 
     private void estimateJitter(RtpPacket packet) {
-        long transitDelay = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
-        long d = transitDelay - this.currentTransitDelay;
-        this.currentTransitDelay = transitDelay;
+        long transitDelayTime = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
+        long d = transitDelayTime - this.currentTransitDelayTime;
+        this.currentTransitDelayTime = transitDelayTime;
 
         if (d < 0) {
             d = -d;
@@ -303,7 +309,7 @@ public class RtcpUnit {
     }
 
     private void initJitter(RtpPacket packet) {
-        this.currentTransitDelay = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
+        this.currentTransitDelayTime = rtpClock.getLocalRtpTime() - packet.getTimeStamp();
 
         /*logger.debug("[initJitter] currentTransitDelay: {}, rtpClock.getLocalRtpTime(): {}, packet.getTimeStamp(): {}",
                 currentTransitDelay, rtpClock.getLocalRtpTime(), packet.getTimeStamp()
@@ -416,9 +422,24 @@ public class RtcpUnit {
     }
 
     public void onReceiveSR(RtcpSenderReport senderReport) {
+        setDelaySincelastSrTimestamp();
         this.lastSrTimestamp = NtpUtils.calculateLastSrTimestamp(senderReport.getMswNts(), senderReport.getLswNts());
         this.lastSrReceivedOn = this.wallClock.getCurrentTime();
         this.receivedSinceSR = 0;
+    }
+
+    public long getDelaySincelastSrTimestamp() {
+        return delaySincelastSrTimestamp;
+    }
+
+    public void setDelaySincelastSrTimestamp() {
+        if (this.lastSrTimestamp > 0) {
+            TimeStamp curTime = TimeStamp.getCurrentTime();
+            long curSeconds = curTime.getSeconds();
+            long curFraction = curTime.getFraction();
+            long curTimeStamp = NtpUtils.calculateLastSrTimestamp(curSeconds, curFraction);
+            this.delaySincelastSrTimestamp = curTimeStamp - lastSrTimestamp;
+        }
     }
 
     @Override

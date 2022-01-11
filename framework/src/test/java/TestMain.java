@@ -1,3 +1,4 @@
+import network.rtcp.RtcpTest;
 import org.junit.Test;
 import rtcp.*;
 
@@ -34,6 +35,9 @@ public class TestMain {
 
         RtcpCompoundPacketTest rtcpCompoundPacketTest = new RtcpCompoundPacketTest();
         rtcpCompoundPacketTest.test();
+
+        RtcpTest rtcpTest = new RtcpTest();
+        rtcpTest.test();
     }
 
 }

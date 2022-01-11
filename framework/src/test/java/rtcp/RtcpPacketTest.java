@@ -3,8 +3,10 @@ package rtcp;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.base.RtcpPacketPaddingResult;
 import network.rtcp.base.RtcpType;
+import network.rtcp.module.SsrcGenerator;
 import network.rtcp.packet.RtcpPacket;
 import network.rtcp.type.RtcpBye;
+import network.rtcp.type.RtcpReceiverReport;
 import network.rtcp.type.RtcpSenderReport;
 import network.rtcp.type.RtcpSourceDescription;
 import network.rtcp.type.base.RtcpReportBlock;
@@ -27,18 +29,20 @@ public class RtcpPacketTest {
 
     @Test
     public void test() {
-        RtcpPacket rtcpPacket = srCreationTest();
+        long ssrc = SsrcGenerator.generateSsrc();
+
+        RtcpPacket rtcpPacket = srCreationTest(ssrc);
         getTest(rtcpPacket.getData());
     }
 
-    public static RtcpPacket srCreationTest() {
+    public static RtcpPacket srCreationTest(long ssrc) {
         // SR
         long curTime = TimeStamp.getCurrentTime().getTime();
 
         // REPORT BLOCK LIST
         List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
         RtcpReportBlock source1 = new RtcpReportBlock(
-                1569920308, (byte) 0, 1,
+                ssrc, (byte) 0, 1,
                 50943, 76,
                 curTime,
                 35390
@@ -63,7 +67,7 @@ public class RtcpPacketTest {
         RtcpHeader rtcpHeader = new RtcpHeader(
                 2, rtcpPacketPaddingResult,
                 rtcpSenderReport.getReportBlockList().size(), RtcpType.SENDER_REPORT,
-                26422708
+                ssrc
         );
         RtcpPacket rtcpPacket = new RtcpPacket(rtcpHeader, rtcpSenderReport);
         logger.debug("[RtcpPacketTest][srCreationTest] RtcpPacket: \n{}", rtcpPacket);
@@ -72,6 +76,45 @@ public class RtcpPacketTest {
         Assert.assertNotNull(rtcpPacketData);
         logger.debug("[RtcpPacketTest][srCreationTest] RtcpPacketTest byte data: (size={})\n{}", rtcpPacketData.length, rtcpPacketData);
         logger.debug("[RtcpPacketTest][srCreationTest] RtcpPacketTest byte data: \n{}", ByteUtil.byteArrayToHex(rtcpPacketData));
+        return rtcpPacket;
+    }
+
+    public static RtcpPacket rrCreationtest(long ssrc) {
+        long curTime = TimeStamp.getCurrentTime().getSeconds();
+
+        // REPORT BLOCK LIST
+        List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
+        RtcpReportBlock source1 = new RtcpReportBlock(
+                ssrc, (byte) 0, 1,
+                50943, 76,
+                curTime, 35390
+        );
+        rtcpReportBlockList.add(source1);
+
+        // RtcpReceiverReport
+        RtcpReceiverReport rtcpReceiverReport = new RtcpReceiverReport(
+                rtcpReportBlockList,
+                null
+        );
+        byte[] rtcpReceiverReportData = rtcpReceiverReport.getData();
+
+        // HEADER
+        RtcpPacketPaddingResult rtcpPacketPaddingResult = RtcpPacket.getPacketLengthByBytes(
+                rtcpReceiverReportData.length, false
+        );
+        logger.debug("[RtcpPacketTest][rrCreationtest] rtcpPacketPaddingResult: {}", rtcpPacketPaddingResult);
+        RtcpHeader rtcpHeader = new RtcpHeader(
+                2, rtcpPacketPaddingResult,
+                rtcpReceiverReport.getReportBlockList().size(), RtcpType.RECEIVER_REPORT,
+                ssrc
+        );
+        RtcpPacket rtcpPacket = new RtcpPacket(rtcpHeader, rtcpReceiverReport);
+        logger.debug("[RtcpPacketTest][rrCreationtest] RtcpPacket: \n{}", rtcpPacket);
+
+        byte[] rtcpPacketData = rtcpPacket.getData();
+        Assert.assertNotNull(rtcpPacketData);
+        logger.debug("[RtcpPacketTest][rrCreationtest] RtcpPacketTest byte data: (size={})\n{}", rtcpPacketData.length, rtcpPacketData);
+        logger.debug("[RtcpPacketTest][rrCreationtest] RtcpPacketTest byte data: \n{}", ByteUtil.byteArrayToHex(rtcpPacketData));
         return rtcpPacket;
     }
 
@@ -89,8 +132,10 @@ public class RtcpPacketTest {
         chunk1SdesItemList.add(chunk1SdesItem2);
         chunk1SdesItemList.add(chunk1SdesItem3);
         chunk1SdesItemList.add(chunk1SdesItem4);
+
+        long ssrc1 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk1 = new SdesChunk(
-                1569920308,
+                ssrc1,
                 chunk1SdesItemList
         );
         sdesChunkList.add(sdesChunk1);
@@ -105,8 +150,10 @@ public class RtcpPacketTest {
         chunk2SdesItemList.add(chunk2SdesItem2);
         chunk2SdesItemList.add(chunk2SdesItem3);
         chunk2SdesItemList.add(chunk2SdesItem4);
+
+        long ssrc2 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk2 = new SdesChunk(
-                26422708,
+                ssrc2,
                 chunk2SdesItemList
         );
         sdesChunkList.add(sdesChunk2);
@@ -119,8 +166,10 @@ public class RtcpPacketTest {
         chunk3SdesItemList.add(chunk3SdesItem1);
         chunk3SdesItemList.add(chunk3SdesItem2);
         chunk3SdesItemList.add(chunk3SdesItem3);
+
+        long ssrc3 = SsrcGenerator.generateSsrc();
         SdesChunk sdesChunk3 = new SdesChunk(
-                328590819,
+                ssrc3,
                 chunk3SdesItemList
         );
         sdesChunkList.add(sdesChunk3);
@@ -148,7 +197,7 @@ public class RtcpPacketTest {
         return rtcpPacket;
     }
 
-    public static RtcpPacket byeCreationTest() {
+    public static RtcpPacket byeCreationTest(long ssrc) {
         String reason = "GOODBYE";
         RtcpBye rtcpBye = new RtcpBye(
                 (short) reason.length(),
@@ -164,7 +213,7 @@ public class RtcpPacketTest {
         RtcpHeader rtcpHeader = new RtcpHeader(
                 2, rtcpPacketPaddingResult,
                 1, RtcpType.GOOD_BYE,
-                26422708
+                ssrc
         );
         RtcpPacket rtcpPacket = new RtcpPacket(rtcpHeader, rtcpBye);
         logger.debug("[RtcpPacketTest][byeCreationTest] RtcpPacket: \n{}", rtcpPacket);

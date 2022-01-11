@@ -3,6 +3,7 @@ package rtcp;
 import network.rtcp.base.RtcpHeader;
 import network.rtcp.base.RtcpPacketPaddingResult;
 import network.rtcp.base.RtcpType;
+import network.rtcp.module.SsrcGenerator;
 import network.rtcp.packet.RtcpCompoundPacket;
 import network.rtcp.packet.RtcpPacket;
 import network.rtcp.type.RtcpSenderReport;
@@ -31,13 +32,14 @@ public class RtcpCompoundPacketTest {
     public void creationTest() {
         ////////////////////////////////////////////////////////////////////////////
         // SR
+        long ssrc = SsrcGenerator.generateSsrc();
         long curTime = TimeStamp.getCurrentTime().getTime();
         long rtpTimeStamp = 250880;
 
         // REPORT BLOCK LIST
         List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
         RtcpReportBlock source1 = new RtcpReportBlock(
-                1569920308,
+                ssrc,
                 (byte) 0,
                 1,
                 50943,
@@ -67,7 +69,7 @@ public class RtcpCompoundPacketTest {
         RtcpHeader rtcpSenderReportPacketHeader = new RtcpHeader(
                 2, rtcpSenderReportPacketPaddingResult,
                 rtcpSenderReport.getReportBlockList().size(), RtcpType.SENDER_REPORT,
-                26422708
+                ssrc
         );
         RtcpPacket rtcpSenderReportPacket = new RtcpPacket(rtcpSenderReportPacketHeader, rtcpSenderReport);
         ////////////////////////////////////////////////////////////////////////////
@@ -86,7 +88,7 @@ public class RtcpCompoundPacketTest {
         chunk1SdesItemList.add(chunk1SdesItem2);
         chunk1SdesItemList.add(chunk1SdesItem3);
         SdesChunk sdesChunk1 = new SdesChunk(
-                1569920308,
+                ssrc,
                 chunk1SdesItemList
         );
         sdesChunkList.add(sdesChunk1);
@@ -103,7 +105,7 @@ public class RtcpCompoundPacketTest {
         logger.debug("rtcpSdesPacketPaddingResult: {}", rtcpSdesPacketPaddingResult);
         RtcpHeader rtcpSdesPacketHeader = new RtcpHeader(
                 2, rtcpSdesPacketPaddingResult,
-                rtcpSourceDescription.getSdesChunkList().size(), RtcpType.SOURCE_DESCRIPTION, 26422708
+                rtcpSourceDescription.getSdesChunkList().size(), RtcpType.SOURCE_DESCRIPTION, ssrc
         );
         RtcpPacket rtcpSdesPacket = new RtcpPacket(rtcpSdesPacketHeader, rtcpSourceDescription);
         ////////////////////////////////////////////////////////////////////////////

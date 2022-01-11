@@ -26,7 +26,7 @@ public class RtcpReportBlock {
     private short fraction; // (8 bits, x/256)
 
     // Cumulative number of packets lost
-    // - Total number of RTP dat packets from source that have been lost since the beginning of reception.
+    // - Total number of RTP packets from source that have been lost since the beginning of reception.
     // - Packets that arrive late ar not counted as lost, and the loss may be negative if there are duplicates.
     private int cnpl; // (24 bits)
 

@@ -1,5 +1,6 @@
 package rtcp;
 
+import network.rtcp.module.SsrcGenerator;
 import network.rtcp.type.RtcpReceiverReport;
 import network.rtcp.type.base.RtcpReportBlock;
 import org.apache.commons.net.ntp.TimeStamp;
@@ -18,17 +19,18 @@ public class RtcpReceiverReportTest {
 
     @Test
     public void test() {
-        byte[] data = creationTest();
+        long ssrc = SsrcGenerator.generateSsrc();
+        long curTime = TimeStamp.getCurrentTime().getTime();
+
+        byte[] data = creationTest(ssrc, curTime);
         getTest(data);
     }
 
-    private byte[] creationTest() {
-        long curTime = TimeStamp.getCurrentTime().getTime();
-
+    private byte[] creationTest(long ssrc, long curTime) {
         // REPORT BLOCK LIST
         List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
         RtcpReportBlock source1 = new RtcpReportBlock(
-                1569920308, (byte) 0, 1,
+                ssrc, (byte) 0, 1,
                 50943, 76,
                 curTime, 35390
         );

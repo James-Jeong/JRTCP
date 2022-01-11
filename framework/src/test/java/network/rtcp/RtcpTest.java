@@ -7,13 +7,19 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import network.ChannelHandlerMaker;
 import network.definition.DestinationRecord;
 import network.definition.NetAddress;
+import network.rtcp.base.RtcpHeader;
+import network.rtcp.base.RtcpPacketPaddingResult;
+import network.rtcp.base.RtcpType;
 import network.rtcp.handler.RtcpClientHandler;
 import network.rtcp.handler.RtcpServerHandler;
 import network.rtcp.module.CnameGenerator;
 import network.rtcp.module.MockWallClock;
 import network.rtcp.module.RtpClock;
+import network.rtcp.module.SsrcGenerator;
 import network.rtcp.packet.RtcpCompoundPacket;
 import network.rtcp.packet.RtcpPacket;
+import network.rtcp.type.RtcpReceiverReport;
+import network.rtcp.type.base.RtcpReportBlock;
 import network.rtcp.unit.RtcpUnit;
 import network.rtp.RtpPacket;
 import network.socket.GroupSocket;
@@ -36,8 +42,8 @@ public class RtcpTest {
     @Test
     public void test() {
         singleRtcpPacketTest();
-        //multiRtcpPacketTest();
-        //rtpStatisticsTest();
+        multiRtcpPacketTest();
+        rtpStatisticsTest();
     }
 
     public void singleRtcpPacketTest() {
@@ -98,12 +104,13 @@ public class RtcpTest {
 
         ////////////////////////////////////////////////////////////
         // RTCP 송수신
+        long ssrc = SsrcGenerator.generateSsrc();
         DestinationRecord destinationRecord = groupSocket1.getDestination(sessionId);
         Assert.assertNotNull(destinationRecord);
         NettyChannel nettyChannel = destinationRecord.getNettyChannel();
         nettyChannel.openConnectChannel(netAddress2.getAddressString(), netAddress2.getPort());
 
-        RtcpPacket rtcpPacket = RtcpPacketTest.srCreationTest();
+        RtcpPacket rtcpPacket = RtcpPacketTest.srCreationTest(ssrc);
         byte[] rtcpPacketData = rtcpPacket.getData();
         Assert.assertNotNull(rtcpPacketData);
         nettyChannel.sendData(rtcpPacketData, rtcpPacketData.length);
@@ -186,15 +193,16 @@ public class RtcpTest {
 
         ////////////////////////////////////////////////////////////
         // RTCP 송수신
+        long ssrc = SsrcGenerator.generateSsrc();
         DestinationRecord destinationRecord = groupSocket1.getDestination(sessionId);
         Assert.assertNotNull(destinationRecord);
         NettyChannel nettyChannel = destinationRecord.getNettyChannel();
         nettyChannel.openConnectChannel(netAddress2.getAddressString(), netAddress2.getPort());
 
         // 주의! RtcpPacket.getData() 함수로 바이트 데이터 가져와서 다시 패킷 객체 생성해서 보내면 패딩 바이트 모두 소멸됨
-        RtcpPacket rtcpSrPacket = RtcpPacketTest.srCreationTest();
+        RtcpPacket rtcpSrPacket = RtcpPacketTest.srCreationTest(ssrc);
         RtcpPacket rtcpSdesPacket = RtcpPacketTest.sdesCreationTest();
-        RtcpPacket rtcpByePacket = RtcpPacketTest.byeCreationTest();
+        RtcpPacket rtcpByePacket = RtcpPacketTest.byeCreationTest(ssrc);
 
         RtcpCompoundPacket rtcpCompoundPacket = new RtcpCompoundPacket();
         rtcpCompoundPacket.addRtcpPacketToListAt(0, rtcpSrPacket);
@@ -247,6 +255,7 @@ public class RtcpTest {
 
         ////////////////////////////////////////////////////////////
         // RtcpUnit 생성
+        long ssrc = SsrcGenerator.generateSsrc();
         int timeDelay = 20; // ms
         MockWallClock mockWallClock = new MockWallClock();
         RtpClock rtpClock = new RtpClock(mockWallClock);
@@ -254,7 +263,7 @@ public class RtcpTest {
 
         RtcpUnit rtcpUnit = new RtcpUnit(
                 rtpClock,
-                1569920308,
+                ssrc,
                 cname
         );
         baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] RtcpUnit: \n%s", rtcpUnit);
@@ -273,7 +282,7 @@ public class RtcpTest {
                     2, 0, 0, 0, 0, 8,
                     i + 1,
                     curTime,
-                    1569920308,
+                    ssrc,
                     data,
                     data.length
             );
@@ -287,13 +296,54 @@ public class RtcpTest {
         // RTP 통계 처리
         TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
+        // RTP Packet 수신 입장
         try {
             int i = 0;
             for (RtpPacket rtpPacket : rtpPacketList) {
+                // RTP Packet 최초 수신 시 시간 동기화 필요 (최초 1회)
                 if (i == 0) {
                     rtpClock.synchronize(rtpPacket.getTimeStamp());
                 }
                 rtcpUnit.onReceiveRtp(rtpPacket);
+
+                ////////////////////////////////////////////////////////////
+                // RECEIVER REPORT TEST (SEND)
+                //
+                List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();
+                RtcpReportBlock source1 = new RtcpReportBlock(
+                        rtcpUnit.getSsrc(),                                 // SSRC
+                        (byte) rtcpUnit.getFractionLost(),                  // Fraction Lost
+                        (int) rtcpUnit.getCumulativeNumberOfPacketsLost(),  // Cumulative Number of Packets Lost
+                        rtcpUnit.getExtHighSequence(),                      // Extended High Sequence number
+                        rtcpUnit.getJitter(),                               // Inter-Arrival Jitter
+                        rtcpUnit.getLastSrTimestamp(),                      // Last SR TimeStamp
+                        rtcpUnit.getDelaySincelastSrTimestamp()             // Delay since Last SR TimeStamp
+                );
+                rtcpReportBlockList.add(source1);
+                //
+
+                //
+                RtcpReceiverReport rtcpReceiverReport = new RtcpReceiverReport(
+                        rtcpReportBlockList,
+                        null
+                );
+                byte[] rtcpReceiverReportData = rtcpReceiverReport.getData();
+                //
+
+                //
+                RtcpPacketPaddingResult rtcpPacketPaddingResult = RtcpPacket.getPacketLengthByBytes(
+                        rtcpReceiverReportData.length, false
+                );
+                RtcpHeader rtcpHeader = new RtcpHeader(
+                        2, rtcpPacketPaddingResult,
+                        rtcpReceiverReport.getReportBlockList().size(), RtcpType.RECEIVER_REPORT,
+                        rtcpUnit.getSsrc()
+                );
+                RtcpPacket rtcpPacket = new RtcpPacket(rtcpHeader, rtcpReceiverReport);
+                baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] [RtcpPacket:\n%s]", rtcpPacket);
+                //
+                ////////////////////////////////////////////////////////////
+
                 baseEnvironment.printMsg("[RtcpTest][rtpStatisticsTest] onReceiveRtp [RtpPacket:\n%s] \nRtcpUnit: \n%s", rtpPacket, rtcpUnit);
                 timeUnit.sleep(timeDelay);
                 mockWallClock.tick(timeDelay * 1000000); // 1 Milliseconds = 1000000 Nanoseconds
@@ -304,6 +354,10 @@ public class RtcpTest {
         }
         ////////////////////////////////////////////////////////////
 
+        ////////////////////////////////////////////////////////////
+        // 인스턴스 삭제
+        baseEnvironment.stop();
+        ////////////////////////////////////////////////////////////
     }
 
 }
