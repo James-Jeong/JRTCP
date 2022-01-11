@@ -37,7 +37,7 @@ public class RtcpPacketTest {
 
     public static RtcpPacket srCreationTest(long ssrc) {
         // SR
-        long curTime = TimeStamp.getCurrentTime().getTime();
+        long curTime = TimeStamp.getCurrentTime().getSeconds();
 
         // REPORT BLOCK LIST
         List<RtcpReportBlock> rtcpReportBlockList = new ArrayList<>();

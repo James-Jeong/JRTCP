@@ -14,6 +14,8 @@ public class CnameGenerator {
     // - A CNAME specifies an alias or nickname for a canonical host name record in a domain name system (DNS) database.
     // - In programming, the term "canonical" means "according to the rules."
     // - The DNS is the standard method of defining the locations of sites on the Internet, particularly Web-sites.
+    // - CNAME 은 무작위로 할당된 SSRC 식별자와 충돌할 수 있으므로 SSRC 와 다른 값으로 생성해야 한다.
+    //      > CNAME 도 SSRC 처럼 RTP 세션 내에서 유일해야 한다.
 
     ////////////////////////////////////////////////////////////
     // FUNCTIONS

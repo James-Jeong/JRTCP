@@ -41,6 +41,7 @@ public class RtcpUnit {
     private final Clock wallClock;
 
     // IDENTIFIERS
+    // > 1 : 1 = RtcpUnit : SSRC(or CNAME)
     private long ssrc;
     private String cname;
 
@@ -66,7 +67,7 @@ public class RtcpUnit {
 
     // SenderReport
     private long lastSrTimestamp;
-    private long delaySincelastSrTimestamp;
+    private long delaySinceLastSrTimestamp; // New
     private long lastSrReceivedOn;
     ////////////////////////////////////////////////////////////
 
@@ -91,7 +92,7 @@ public class RtcpUnit {
         this.currentTransitDelayTime = 0;
         this.jitter = -1;
         this.lastSrTimestamp = 0;
-        this.delaySincelastSrTimestamp = 0;
+        this.delaySinceLastSrTimestamp = 0; // New
         this.lastSrReceivedOn = 0;
         this.roundTripDelay = 0;
     }
@@ -251,6 +252,7 @@ public class RtcpUnit {
         return getExtHighSequence() - this.firstSequenceNumber + 1;
     }
 
+    // New
     public long getCumulativeNumberOfPacketsLost() {
         return getPacketsExpected() - this.receivedPackets;
     }
@@ -422,23 +424,25 @@ public class RtcpUnit {
     }
 
     public void onReceiveSR(RtcpSenderReport senderReport) {
-        setDelaySincelastSrTimestamp();
+        setDelaySinceLastSrTimestamp();
         this.lastSrTimestamp = NtpUtils.calculateLastSrTimestamp(senderReport.getMswNts(), senderReport.getLswNts());
         this.lastSrReceivedOn = this.wallClock.getCurrentTime();
         this.receivedSinceSR = 0;
     }
 
-    public long getDelaySincelastSrTimestamp() {
-        return delaySincelastSrTimestamp;
+    // New
+    public long getDelaySinceLastSrTimestamp() {
+        return delaySinceLastSrTimestamp;
     }
 
-    public void setDelaySincelastSrTimestamp() {
+    // New
+    public void setDelaySinceLastSrTimestamp() {
         if (this.lastSrTimestamp > 0) {
             TimeStamp curTime = TimeStamp.getCurrentTime();
             long curSeconds = curTime.getSeconds();
             long curFraction = curTime.getFraction();
             long curTimeStamp = NtpUtils.calculateLastSrTimestamp(curSeconds, curFraction);
-            this.delaySincelastSrTimestamp = curTimeStamp - lastSrTimestamp;
+            this.delaySinceLastSrTimestamp = curTimeStamp - lastSrTimestamp;
         }
     }
 
