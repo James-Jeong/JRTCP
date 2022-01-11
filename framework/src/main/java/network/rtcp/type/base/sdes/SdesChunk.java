@@ -2,12 +2,10 @@ package network.rtcp.type.base.sdes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.packet.rtcp.RtcpPacket;
 import util.module.ByteUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SdesChunk {
