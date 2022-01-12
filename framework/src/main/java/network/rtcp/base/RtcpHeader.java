@@ -119,20 +119,20 @@ public class RtcpHeader {
             int index = 0;
 
             // V, P, RC
-            byte[] vprcData = new byte[1];
-            System.arraycopy(data, index, vprcData, 0, 1);
+            byte[] vprcData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, vprcData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
             version = (vprcData[0] >>> 0x06) & 0x03;
             padding = (vprcData[0] >>> 0x05) & 0x01;
             resourceCount = vprcData[0] & 0x05;
-            index += 1;
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
 
             // PT
-            byte[] ptData = new byte[1];
-            System.arraycopy(data, index, ptData, 0, 1);
+            byte[] ptData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, ptData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
             byte[] ptData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
-            System.arraycopy(ptData, 0, ptData2, 1, 1);
+            System.arraycopy(ptData, 0, ptData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
             packetType = ByteUtil.bytesToShort(ptData2, true);
-            index += 1;
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
 
             // LENGTH
             byte[] lengthData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
@@ -173,14 +173,14 @@ public class RtcpHeader {
         vprc <<= 0x05;
         vprc |= resourceCount;
         byte[] vprcData = { vprc };
-        System.arraycopy(vprcData, 0, data, index, 1);
-        index += 1;
+        System.arraycopy(vprcData, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
 
         // PT
         byte[] ptData = ByteUtil.shortToBytes(packetType, true);
-        byte[] ptData2 = { ptData[1] };
+        byte[] ptData2 = { ptData[ByteUtil.NUM_BYTES_IN_BYTE] };
         System.arraycopy(ptData2, 0, data, index, ptData2.length);
-        index += 1;
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
 
         // LENGTH
         byte[] lengthData = ByteUtil.shortToBytes((short) length, true);

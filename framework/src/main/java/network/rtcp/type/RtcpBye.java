@@ -19,7 +19,7 @@ public class RtcpBye extends RtcpFormat {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = 1; // bytes
+    public static final int MIN_LENGTH = ByteUtil.NUM_BYTES_IN_BYTE; // bytes
     public static final int LIMIT_REASON_LENGTH = 255; // bytes
 
     // LENGTH
@@ -72,8 +72,8 @@ public class RtcpBye extends RtcpFormat {
 
         // LENGTH
         byte[] lengthData = ByteUtil.shortToBytes(length, true);
-        System.arraycopy(lengthData, 1, data, index, 1);
-        index += 1;
+        System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_BYTE, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
 
         // REASON
         if (reason != null && !reason.isEmpty()) {
