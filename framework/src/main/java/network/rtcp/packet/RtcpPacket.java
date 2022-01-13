@@ -52,6 +52,21 @@ public class RtcpPacket {
      * - 주의 사항
      * 1) RTCP 자신의 패킷에 따라 RTP 미디어 스트림의 패킷 송수신의 품질에 영향을 주지 않도록 주의할 필요가 있다.
      *      - RTCP 패킷이 RTP 미디어 스트림 패킷에 대해서 점유하는 비율은 최대 5%까지로 하는 것을 추천
+     *
+     *
+     *      Request:
+     *           Message that requires acknowledgement
+     *
+     *      Command:
+     *           Message that forces the receiver to an action
+     *
+     *      Indication:
+     *           Message that reports a situation
+     *
+     *      Notification:
+     *           Message that provides a notification that an event has
+     *           occurred.  Notifications are commonly generated in
+     *           response to a Request.
      */
 
     ////////////////////////////////////////////////////////////
