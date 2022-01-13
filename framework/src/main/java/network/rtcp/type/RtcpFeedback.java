@@ -3,7 +3,7 @@ package network.rtcp.type;
 import network.rtcp.base.RtcpFormat;
 import network.rtcp.base.RtcpHeader;
 
-public class RtcpFeedBack extends RtcpFormat {
+public class RtcpFeedback extends RtcpFormat {
 
     /**
      *    0                   1                   2                   3
