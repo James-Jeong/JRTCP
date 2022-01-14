@@ -112,7 +112,48 @@ public class RtcpFeedbackMessageHeader {
     public RtcpFeedbackMessageHeader() {}
 
     public RtcpFeedbackMessageHeader(byte[] data) {
+        if (data.length == LENGTH) {
+            int index = 0;
 
+            // V, P, RC
+            byte[] vprcData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, vprcData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            version = (vprcData[0] >>> 0x06) & 0x03;
+            padding = (vprcData[0] >>> 0x05) & 0x01;
+            feedbackMessageType = vprcData[0] & 0x05;
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            // PT
+            byte[] ptData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, ptData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            byte[] ptData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(ptData, 0, ptData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
+            payloadType = ByteUtil.bytesToShort(ptData2, true);
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            // LENGTH
+            byte[] lengthData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(data, index, lengthData, 0, 2);
+            byte[] lengthData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(lengthData, 0, lengthData2, ByteUtil.NUM_BYTES_IN_SHORT, ByteUtil.NUM_BYTES_IN_SHORT);
+            length = ByteUtil.bytesToInt(lengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+            // Packet Sender SSRC
+            byte[] packetSenderSsrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(data, index, packetSenderSsrcData, 0, ByteUtil.NUM_BYTES_IN_INT);
+            byte[] packetSenderSsrcData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(packetSenderSsrcData, 0, packetSenderSsrcData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            packetSenderSsrc = ByteUtil.bytesToLong(packetSenderSsrcData2, true);
+            index += packetSenderSsrcData.length;
+
+            // Media Source SSRC
+            byte[] mediaSourceSsrcData = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(data, index, mediaSourceSsrcData, 0, ByteUtil.NUM_BYTES_IN_INT);
+            byte[] mediaSourceSsrcDataData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
+            System.arraycopy(mediaSourceSsrcData, 0, mediaSourceSsrcDataData2, ByteUtil.NUM_BYTES_IN_INT, ByteUtil.NUM_BYTES_IN_INT);
+            mediaSourceSsrc = ByteUtil.bytesToLong(mediaSourceSsrcDataData2, true);
+        }
     }
     ////////////////////////////////////////////////////////////
 
