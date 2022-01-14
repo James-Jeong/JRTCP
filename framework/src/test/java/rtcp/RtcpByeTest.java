@@ -1,6 +1,6 @@
 package rtcp;
 
-import network.rtcp.type.report.RtcpBye;
+import network.rtcp.type.regular.RtcpBye;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

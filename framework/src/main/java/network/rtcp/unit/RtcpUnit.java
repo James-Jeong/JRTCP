@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import network.rtcp.module.Clock;
 import network.rtcp.module.NtpUtils;
 import network.rtcp.module.RtpClock;
-import network.rtcp.type.report.RtcpSenderReport;
+import network.rtcp.type.regular.RtcpSenderReport;
 import network.rtp.RtpPacket;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.slf4j.Logger;

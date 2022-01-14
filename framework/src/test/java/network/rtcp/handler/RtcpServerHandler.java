@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
-import network.rtcp.type.report.base.RtcpHeader;
+import network.rtcp.type.regular.base.RtcpHeader;
 import network.rtcp.base.RtcpType;
 import network.rtcp.packet.RtcpCompoundPacket;
 import network.rtcp.packet.RtcpPacket;

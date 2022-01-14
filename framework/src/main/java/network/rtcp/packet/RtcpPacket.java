@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpFormat;
 import network.rtcp.base.RtcpType;
-import network.rtcp.type.report.*;
-import network.rtcp.type.report.base.RtcpHeader;
+import network.rtcp.type.regular.*;
+import network.rtcp.type.regular.base.RtcpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

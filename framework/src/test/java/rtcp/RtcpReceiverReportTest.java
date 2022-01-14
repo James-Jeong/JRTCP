@@ -1,8 +1,8 @@
 package rtcp;
 
 import network.rtcp.module.SsrcGenerator;
-import network.rtcp.type.report.RtcpReceiverReport;
-import network.rtcp.type.report.base.report.RtcpReportBlock;
+import network.rtcp.type.regular.RtcpReceiverReport;
+import network.rtcp.type.regular.base.report.RtcpReportBlock;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Assert;
 import org.junit.Test;
