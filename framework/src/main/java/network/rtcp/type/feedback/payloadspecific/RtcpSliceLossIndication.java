@@ -1,4 +1,8 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpSliceLossIndication extends RtcpFeedback {
 
@@ -46,5 +50,32 @@ public class RtcpSliceLossIndication extends RtcpFeedback {
      *
      *
      */
+
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpSliceLossIndication(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpSliceLossIndication() {
+    }
+
+    public RtcpSliceLossIndication(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

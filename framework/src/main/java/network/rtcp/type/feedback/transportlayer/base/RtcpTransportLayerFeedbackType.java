@@ -1,4 +1,4 @@
-package network.rtcp.type.feedback.base;
+package network.rtcp.type.feedback.transportlayer.base;
 
 public class RtcpTransportLayerFeedbackType {
 

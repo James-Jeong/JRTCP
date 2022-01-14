@@ -1,4 +1,4 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.transportlayer;
 
 /**
  * @Reference https://datatracker.ietf.org/doc/html/rfc4585#section-6.1
@@ -17,6 +17,9 @@ package network.rtcp.type.feedback;
  *
  *            Figure 3: Common Packet Format for Feedback Messages
  */
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
 
 /**
  * @Reference https://datatracker.ietf.org/doc/html/rfc5104#section-2.2
@@ -150,5 +153,31 @@ public class RtcpTemporaryMaximumMediaStreamBitRateNotification extends RtcpFeed
      *
      */
 
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpTemporaryMaximumMediaStreamBitRateNotification(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpTemporaryMaximumMediaStreamBitRateNotification() {
+    }
+
+    public RtcpTemporaryMaximumMediaStreamBitRateNotification(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

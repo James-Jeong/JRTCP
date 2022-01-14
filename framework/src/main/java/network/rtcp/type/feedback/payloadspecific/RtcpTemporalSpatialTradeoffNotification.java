@@ -1,4 +1,8 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpTemporalSpatialTradeoffNotification extends RtcpFeedback {
 
@@ -73,7 +77,33 @@ public class RtcpTemporalSpatialTradeoffNotification extends RtcpFeedback {
      *    requesting entities to which the Notification applies are in the
      *    corresponding FCI entries.
      *
-     *
      */
+
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpTemporalSpatialTradeoffNotification(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpTemporalSpatialTradeoffNotification() {
+    }
+
+    public RtcpTemporalSpatialTradeoffNotification(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

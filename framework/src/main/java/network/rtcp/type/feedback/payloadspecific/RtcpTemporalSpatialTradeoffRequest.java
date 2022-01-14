@@ -1,4 +1,8 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpTemporalSpatialTradeoffRequest extends RtcpFeedback {
 
@@ -50,8 +54,33 @@ public class RtcpTemporalSpatialTradeoffRequest extends RtcpFeedback {
      *    > 인코더가 디코더가 원하는 TST 를 허용하면 추후에 사용될 프레임 코딩에
      *      인코더는 이 TSTR 메시지를 사용하면 된다.
      *
-     *
-     *
      */
+
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpTemporalSpatialTradeoffRequest(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpTemporalSpatialTradeoffRequest() {
+    }
+
+    public RtcpTemporalSpatialTradeoffRequest(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

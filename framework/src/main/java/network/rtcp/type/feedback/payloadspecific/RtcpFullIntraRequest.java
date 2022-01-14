@@ -1,5 +1,7 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
 
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
 import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpFullIntraRequest extends RtcpFeedback { // Full INTRA-frame Request
@@ -88,10 +90,29 @@ public class RtcpFullIntraRequest extends RtcpFeedback { // Full INTRA-frame Req
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpHeader.LENGTH; // bytes
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
 
 
     ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpFullIntraRequest(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpFullIntraRequest() {
+    }
+
+    public RtcpFullIntraRequest(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

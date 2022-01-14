@@ -1,4 +1,8 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpReferencePictureSelectionIndication extends RtcpFeedback {
 
@@ -38,5 +42,32 @@ public class RtcpReferencePictureSelectionIndication extends RtcpFeedback {
      *       message to the next 32-bit boundary.  The number of padding bits
      *       MUST be indicated by the PB field.
      */
+
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpReferencePictureSelectionIndication(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpReferencePictureSelectionIndication() {
+    }
+
+    public RtcpReferencePictureSelectionIndication(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

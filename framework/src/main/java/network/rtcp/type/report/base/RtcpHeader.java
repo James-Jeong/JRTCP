@@ -168,7 +168,7 @@ public class RtcpHeader {
         int index = 0;
 
         // V, P, RC
-        byte vprc = 0;
+        byte vprc = 0; // version + padding + resource-count
         vprc |= version;
         vprc <<= 0x01;
         vprc |= padding;

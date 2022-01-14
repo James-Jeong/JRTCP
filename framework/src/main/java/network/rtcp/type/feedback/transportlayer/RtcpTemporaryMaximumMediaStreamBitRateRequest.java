@@ -1,59 +1,7 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.transportlayer;
 
-/**
- * @Reference https://datatracker.ietf.org/doc/html/rfc4585#section-6.1
- *
- *     0                   1                   2                   3
- *     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *    |V=2|P|   FMT   |       PT      |          length               |
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *    |                  SSRC of packet sender                        |
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *    |                  SSRC of media source                         |
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *    :            Feedback Control Information (FCI)                 :
- *    :                                                               :
- *
- *            Figure 3: Common Packet Format for Feedback Messages
- *
- *    Feedback message type (FMT): 5 bits
- *       This field identifies the type of the FB message and is
- *       interpreted relative to the type (transport layer, payload-
- *       specific, or application layer feedback).  The values for each of
- *       the three feedback types are defined in the respective sections
- *       below.
- *
- *    Payload type (PT): 8 bits
- *       This is the RTCP packet type that identifies the packet as being
- *       an RTCP FB message.  Two values are defined by the IANA:
- *
- *             Name   | Value | Brief Description
- *          ----------+-------+------------------------------------
- *             RTPFB  |  205  | Transport layer FB message
- *             PSFB   |  206  | Payload-specific FB message
- *
- *    Length: 16 bits
- *       The length of this packet in 32-bit words minus one, including the
- *       header and any padding.  This is in line with the definition of
- *       the length field used in RTCP sender and receiver reports [3].
- *
- *    SSRC of packet sender: 32 bits
- *       The synchronization source identifier for the originator of this
- *       packet.
- *
- *    SSRC of media source: 32 bits
- *       The synchronization source identifier of the media source that
- *       this piece of feedback information is related to.
- *
- *    Feedback Control Information (FCI): variable length
- *       The following three sections define which additional information
- *       MAY be included in the FB message for each type of feedback:
- *       transport layer, payload-specific, or application layer feedback.
- *       Note that further FCI contents MAY be specified in further
- *       documents.
- *
- */
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
 
 public class RtcpTemporaryMaximumMediaStreamBitRateRequest extends RtcpFeedback {
 
@@ -365,6 +313,31 @@ public class RtcpTemporaryMaximumMediaStreamBitRateRequest extends RtcpFeedback 
      *
      */
 
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
 
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpTemporaryMaximumMediaStreamBitRateRequest(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpTemporaryMaximumMediaStreamBitRateRequest() {
+    }
+
+    public RtcpTemporaryMaximumMediaStreamBitRateRequest(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }

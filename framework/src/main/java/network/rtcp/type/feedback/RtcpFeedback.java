@@ -1,7 +1,7 @@
 package network.rtcp.type.feedback;
 
 import network.rtcp.base.RtcpFormat;
-import network.rtcp.type.report.base.RtcpHeader;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
 
 public class RtcpFeedback extends RtcpFormat {
 
@@ -9,7 +9,7 @@ public class RtcpFeedback extends RtcpFormat {
      *    0                   1                   2                   3
      *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     *   |V=2|P| FMT=11  |   PT = 205    |          length               |
+     *   |V=2|P| FMT     |   PT          |          length               |
      *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      *   |                 SSRC of RTCP packet sender                    |
      *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -110,11 +110,31 @@ public class RtcpFeedback extends RtcpFormat {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpHeader.LENGTH; // bytes
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
 
-
+    private RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader;
     ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpFeedback(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        this.rtcpFeedbackMessageHeader = rtcpFeedbackMessageHeader;
+    }
 
+    public RtcpFeedback() {}
+
+    public RtcpFeedback(byte[] data) {}
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+    public RtcpFeedbackMessageHeader getRtcpFeedbackMessageHeader() {
+        return rtcpFeedbackMessageHeader;
+    }
+
+    public void setRtcpFeedbackMessageHeader(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        this.rtcpFeedbackMessageHeader = rtcpFeedbackMessageHeader;
+    }
+    ////////////////////////////////////////////////////////////
 
 }

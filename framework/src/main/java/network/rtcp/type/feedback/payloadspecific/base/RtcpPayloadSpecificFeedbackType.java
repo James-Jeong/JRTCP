@@ -1,4 +1,4 @@
-package network.rtcp.type.feedback.base;
+package network.rtcp.type.feedback.payloadspecific.base;
 
 public class RtcpPayloadSpecificFeedbackType {
 
@@ -16,7 +16,8 @@ public class RtcpPayloadSpecificFeedbackType {
     public static final int UNASSIGNED = 0;
     public static final int PLI = 1; // Picture Loss Indication
     public static final int SLI = 2; // Slice Loss Indication
-    public static final int RTSI = 3; // Reference Picture Selection Indication
+    public static final int RPSI = 3; // Reference Picture Selection Indication
+    public static final int FIR = 4; // Full Intra Request
     public static final int TSTR = 5; // Temporal-Spatial Trade-off Request
     public static final int TSTN = 6; // Temporal-Spatial Trade-off Notification
     public static final int VBCM = 7; // H.271 Video Back Channel Message

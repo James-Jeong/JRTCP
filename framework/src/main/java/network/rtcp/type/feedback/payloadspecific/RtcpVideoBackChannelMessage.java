@@ -1,4 +1,8 @@
-package network.rtcp.type.feedback;
+package network.rtcp.type.feedback.payloadspecific;
+
+import network.rtcp.type.feedback.RtcpFeedback;
+import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpVideoBackChannelMessage extends RtcpFeedback {
 
@@ -77,7 +81,33 @@ public class RtcpVideoBackChannelMessage extends RtcpFeedback {
      *               refresh the video bit stream as if no prior bit stream data had been received
      *    > 5        Reserved for future use by ITU-T
      *
-     *
      */
+
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+
+
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTOR
+    public RtcpVideoBackChannelMessage(RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader) {
+        super(rtcpFeedbackMessageHeader);
+    }
+
+    public RtcpVideoBackChannelMessage() {
+    }
+
+    public RtcpVideoBackChannelMessage(byte[] data) {
+        super(data);
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+
+
+    ////////////////////////////////////////////////////////////
 
 }
