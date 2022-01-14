@@ -22,6 +22,11 @@
         - TSTN
         - VBCM
         - AFB
+6) [EXTENDED] RTCP Feedback Information 을 이용한 RTP PAUSE, RESUME 기능 지원 (개발 중)
+    - PAUSE
+    - RESUME
+    - PAUSED
+    - REFUSED
 ~~~
 
 ### Reference
@@ -31,9 +36,13 @@ https://www.freesoft.org/CIE/RFC/1889/13.htm
 https://datatracker.ietf.org/doc/html/rfc1889  
 
 #### RTCP EXTENDED
+##### Feedback message
 https://datatracker.ietf.org/doc/html/rfc4585  
 https://datatracker.ietf.org/doc/html/rfc5104  
 https://datatracker.ietf.org/doc/html/rfc2032  
+  
+##### Feedback Information for RTP Control (PAUSE, RESUME, etc)
+https://datatracker.ietf.org/doc/html/rfc7728  
   
 
 #### 오픈 소스
