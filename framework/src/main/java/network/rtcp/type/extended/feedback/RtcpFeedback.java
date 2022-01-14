@@ -10,6 +10,16 @@ public class RtcpFeedback extends RtcpFormat {
      * @Reference https://datatracker.ietf.org/doc/html/rfc5104
      * @Reference https://datatracker.ietf.org/doc/html/rfc2032
      *
+     *    AVPF:     Audio-Visual Profile with Feedback (RFC 4585)
+     *    CCM:      Codec Control Message (RFC 5104)
+     *    CNAME:    Canonical Name (RTCP Source Description)
+     *    CSRC:     Contributing Source (RTP)
+     *    FCI:      Feedback Control Information (AVPF)
+     *    FIR:      Full Intra Refresh (CCM)
+     *    FMT:      Feedback Message Type (AVPF)
+     *    MCU:      Multipoint Control Unit
+     *    MTU:      Maximum Transfer Unit
+     *
      *    0                   1                   2                   3
      *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
