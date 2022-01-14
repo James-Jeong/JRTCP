@@ -1,27 +1,45 @@
 # JRTCP
-## RTCP Module (Stack)
+## RTCP Stack
 ~~~
 1) Netty 사용
 2) RTP 기반 테스트 활용
 3) Single or Compound 패킷 테스트 가능 (by wireshark)
 4) Restcomm 오픈 소스 활용
-    - RtpClock
-    - Rtp Statistics
-    - Ntp handling
+    - RTP Clock
+    - RTP Statistics
+    - NTP handling
+5) [EXTENDED] RTCP Feedback Message 지원 (for video streaming) (개발 중)
+    - Transport-layer
+        - NACK
+        - TMMBR
+        - TMMBN
+    - Payload-specific
+        - PLI
+        - SLI
+        - RPSI
+        - FIR
+        - TSTR
+        - TSTN
+        - VBCM
+        - AFB
 ~~~
 
 ### Reference
-#### 규격
+#### RTCP REGULAR
 https://www4.cs.fau.de/Projects/JRTP/pmt/node82.html
-  
 https://www.freesoft.org/CIE/RFC/1889/13.htm
-  
 https://datatracker.ietf.org/doc/html/rfc1889
   
+#### RTCP EXTENDED
+https://datatracker.ietf.org/doc/html/rfc4585
+https://datatracker.ietf.org/doc/html/rfc5104
+https://datatracker.ietf.org/doc/html/rfc2032
+  
+
 #### 오픈 소스
 https://github.com/RestComm/media-core
   
-### Example
+### Example (RFC 1889)
 #### Single packet
   
 ~~~
@@ -698,4 +716,6 @@ index: [136]
   ]
 }
 ~~~
+  
+### Example (RFC 5104, 4585, 2032)
   
