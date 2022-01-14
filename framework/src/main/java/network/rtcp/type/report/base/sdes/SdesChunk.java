@@ -1,4 +1,4 @@
-package network.rtcp.type.base.sdes;
+package network.rtcp.type.report.base.sdes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

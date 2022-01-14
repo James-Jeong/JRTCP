@@ -3,10 +3,9 @@ package network.rtcp.packet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpFormat;
-import network.rtcp.base.RtcpHeader;
-import network.rtcp.base.RtcpPacketPaddingResult;
 import network.rtcp.base.RtcpType;
-import network.rtcp.type.*;
+import network.rtcp.type.report.*;
+import network.rtcp.type.report.base.RtcpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

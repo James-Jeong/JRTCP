@@ -1,6 +1,6 @@
 package rtcp;
 
-import network.rtcp.base.RtcpHeader;
+import network.rtcp.type.report.base.RtcpHeader;
 import network.rtcp.module.SsrcGenerator;
 import org.junit.Assert;
 import org.junit.Test;

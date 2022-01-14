@@ -1,9 +1,9 @@
-package network.rtcp.type;
+package network.rtcp.type.report;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpFormat;
-import network.rtcp.type.base.sdes.SdesChunk;
+import network.rtcp.type.report.base.sdes.SdesChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

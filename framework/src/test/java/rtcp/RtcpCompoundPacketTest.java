@@ -1,17 +1,17 @@
 package rtcp;
 
-import network.rtcp.base.RtcpHeader;
-import network.rtcp.base.RtcpPacketPaddingResult;
+import network.rtcp.type.report.base.RtcpHeader;
+import network.rtcp.packet.RtcpPacketPaddingResult;
 import network.rtcp.base.RtcpType;
 import network.rtcp.module.SsrcGenerator;
 import network.rtcp.packet.RtcpCompoundPacket;
 import network.rtcp.packet.RtcpPacket;
-import network.rtcp.type.RtcpSenderReport;
-import network.rtcp.type.RtcpSourceDescription;
-import network.rtcp.type.base.RtcpReportBlock;
-import network.rtcp.type.base.sdes.SdesChunk;
-import network.rtcp.type.base.sdes.SdesItem;
-import network.rtcp.type.base.sdes.SdesType;
+import network.rtcp.type.report.RtcpSenderReport;
+import network.rtcp.type.report.RtcpSourceDescription;
+import network.rtcp.type.report.base.report.RtcpReportBlock;
+import network.rtcp.type.report.base.sdes.SdesChunk;
+import network.rtcp.type.report.base.sdes.SdesItem;
+import network.rtcp.type.report.base.sdes.SdesType;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Test;
 import org.slf4j.Logger;

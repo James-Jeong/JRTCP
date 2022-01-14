@@ -1,4 +1,4 @@
-package network.rtcp.type;
+package network.rtcp.type.report;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

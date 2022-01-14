@@ -1,4 +1,4 @@
-package network.rtcp.type.base.sdes;
+package network.rtcp.type.report.base.sdes;
 
 public enum SdesType {
 

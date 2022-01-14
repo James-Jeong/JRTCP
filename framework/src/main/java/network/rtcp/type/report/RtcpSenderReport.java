@@ -1,9 +1,9 @@
-package network.rtcp.type;
+package network.rtcp.type.report;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.rtcp.base.RtcpFormat;
-import network.rtcp.type.base.RtcpReportBlock;
+import network.rtcp.type.report.base.report.RtcpReportBlock;
 import util.module.ByteUtil;
 
 import java.util.ArrayList;

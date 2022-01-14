@@ -1,4 +1,4 @@
-package network.rtcp.type.base.feedback;
+package network.rtcp.type.feedback.base;
 
 public class RtcpFeedbackControlInformation {
 

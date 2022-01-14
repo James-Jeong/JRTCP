@@ -1,11 +1,10 @@
 package rtcp;
 
 import network.rtcp.module.SsrcGenerator;
-import network.rtcp.type.RtcpSenderReport;
-import network.rtcp.type.RtcpSourceDescription;
-import network.rtcp.type.base.sdes.SdesChunk;
-import network.rtcp.type.base.sdes.SdesItem;
-import network.rtcp.type.base.sdes.SdesType;
+import network.rtcp.type.report.RtcpSourceDescription;
+import network.rtcp.type.report.base.sdes.SdesChunk;
+import network.rtcp.type.report.base.sdes.SdesItem;
+import network.rtcp.type.report.base.sdes.SdesType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

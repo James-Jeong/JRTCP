@@ -1,4 +1,4 @@
-package network.rtcp.type.base.feedback;
+package network.rtcp.type.feedback;
 
 /**
  * @Reference https://datatracker.ietf.org/doc/html/rfc4585#section-6.1
@@ -63,7 +63,7 @@ package network.rtcp.type.base.feedback;
  *
  */
 
-public class RtcpTmMbn {
+public class RtcpTemporaryMaximumMediaStreamBitRateNotification extends RtcpFeedback {
 
     /**
      * @Reference https://datatracker.ietf.org/doc/html/rfc5104#page-29
@@ -93,7 +93,7 @@ public class RtcpTmMbn {
      *    multipoint conference, a new user joins the session and
      *    no regular decoder refresh point interval is established.
      *    > FIR 에 대한 가장 대표적인 예시로는 다중 엔드포인트로 구성된 회의방에서 새로운 사용자가 해당 세션에 참가할 때,
-     *      decoder refresh point 간격이 있으면 안되는 경우이다.
+     *      decoder refresh point 간격이 있으면 안되는 경우 전송
      *
      *  Another example would
      *    be a video switching MCU that changes streams.  Here, normally, the
@@ -102,9 +102,7 @@ public class RtcpTmMbn {
      *    Picture Release (defined outside this specification), which re-starts
      *    the rendering process of the receivers.  Both techniques mentioned
      *    are commonly used in MCU-based multipoint conferences.
-     *
-     *    TODO : page 44 (rfc5104)
-     *
+     *    > MCU 스트림 변경 시 전송, decoder refresh point 를 MCU 가 수신하기 위해서 새로운 미디어 전송자에게 FIR 패킷 전송
      */
 
     /**

@@ -1,4 +1,4 @@
-package network.rtcp.type.base.feedback;
+package network.rtcp.type.feedback;
 
 /**
  * @Reference https://datatracker.ietf.org/doc/html/rfc4585#section-6.1
@@ -55,7 +55,7 @@ package network.rtcp.type.base.feedback;
  *
  */
 
-public class RtcpTmMbr {
+public class RtcpTemporaryMaximumMediaStreamBitRateRequest extends RtcpFeedback {
 
     /**
      * @Reference https://datatracker.ietf.org/doc/html/rfc5104#page-29

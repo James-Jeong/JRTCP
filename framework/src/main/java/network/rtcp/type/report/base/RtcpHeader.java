@@ -1,7 +1,9 @@
-package network.rtcp.base;
+package network.rtcp.type.report.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import network.rtcp.base.RtcpType;
+import network.rtcp.packet.RtcpPacketPaddingResult;
 import util.module.ByteUtil;
 
 public class RtcpHeader {
