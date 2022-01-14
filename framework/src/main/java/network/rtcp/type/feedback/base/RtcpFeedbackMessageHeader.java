@@ -2,7 +2,6 @@ package network.rtcp.type.feedback.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.rtcp.base.RtcpType;
 import util.module.ByteUtil;
 
 public class RtcpFeedbackMessageHeader {
@@ -83,7 +82,7 @@ public class RtcpFeedbackMessageHeader {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = 12;
+    public static final int LENGTH = 12;
     private int version = 0; // (2 bits)
     private int padding = 0; // (1 bit)
     transient private int paddingBytes = 0;
@@ -92,7 +91,6 @@ public class RtcpFeedbackMessageHeader {
     private int length = 0; // (16 bits)
     private long packetSenderSsrc = 0; // (32 bits)
     private long mediaSourceSsrc = 0; // (32 bits)
-    private RtcpFeedbackControlInformation feedbackControlInformation; // variable length
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
@@ -109,7 +107,6 @@ public class RtcpFeedbackMessageHeader {
         this.length = length;
         this.packetSenderSsrc = packetSenderSsrc;
         this.mediaSourceSsrc = mediaSourceSsrc;
-        this.feedbackControlInformation = feedbackControlInformation;
     }
 
     public RtcpFeedbackMessageHeader() {}
@@ -123,7 +120,7 @@ public class RtcpFeedbackMessageHeader {
     // FUNCTIONS
     public byte[] getData() {
         int index = 0;
-        byte[] data = new byte[MIN_LENGTH];
+        byte[] data = new byte[LENGTH];
 
         byte vpfmt = 0; // version + padding + feedback-message-type
         vpfmt |= version;
@@ -156,17 +153,12 @@ public class RtcpFeedbackMessageHeader {
         System.arraycopy(mediaSourceSsrcData, 0, data, index, mediaSourceSsrcData.length);
         index += mediaSourceSsrcData.length;
 
-        if (feedbackControlInformation != null) {
-            // TODO
-        }
-
         return data;
     }
 
     public void setData(int version, int padding, int paddingBytes,
                         int feedbackMessageType, short payloadType, int length,
-                        long packetSenderSsrc, long mediaSourceSsrc,
-                        RtcpFeedbackControlInformation feedbackControlInformation) {
+                        long packetSenderSsrc, long mediaSourceSsrc) {
         this.version = version;
         this.padding = padding;
         this.paddingBytes = paddingBytes;
@@ -175,7 +167,6 @@ public class RtcpFeedbackMessageHeader {
         this.length = length;
         this.packetSenderSsrc = packetSenderSsrc;
         this.mediaSourceSsrc = mediaSourceSsrc;
-        this.feedbackControlInformation = feedbackControlInformation;
     }
 
     public int getVersion() {
@@ -240,14 +231,6 @@ public class RtcpFeedbackMessageHeader {
 
     public void setMediaSourceSsrc(long mediaSourceSsrc) {
         this.mediaSourceSsrc = mediaSourceSsrc;
-    }
-
-    public RtcpFeedbackControlInformation getFeedbackControlInformation() {
-        return feedbackControlInformation;
-    }
-
-    public void setFeedbackControlInformation(RtcpFeedbackControlInformation feedbackControlInformation) {
-        this.feedbackControlInformation = feedbackControlInformation;
     }
 
     @Override

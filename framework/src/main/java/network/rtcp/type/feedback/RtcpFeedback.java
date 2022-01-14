@@ -110,7 +110,7 @@ public class RtcpFeedback extends RtcpFormat {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.LENGTH; // bytes
 
     private RtcpFeedbackMessageHeader rtcpFeedbackMessageHeader;
     ////////////////////////////////////////////////////////////

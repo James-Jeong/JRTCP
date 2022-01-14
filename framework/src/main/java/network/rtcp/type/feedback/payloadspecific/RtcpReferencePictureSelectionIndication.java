@@ -2,7 +2,6 @@ package network.rtcp.type.feedback.payloadspecific;
 
 import network.rtcp.type.feedback.RtcpFeedback;
 import network.rtcp.type.feedback.base.RtcpFeedbackMessageHeader;
-import network.rtcp.type.report.base.RtcpHeader;
 
 public class RtcpReferencePictureSelectionIndication extends RtcpFeedback {
 
@@ -45,7 +44,7 @@ public class RtcpReferencePictureSelectionIndication extends RtcpFeedback {
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.MIN_LENGTH; // bytes
+    public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.LENGTH; // bytes
 
 
     ////////////////////////////////////////////////////////////
