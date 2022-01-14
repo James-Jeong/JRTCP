@@ -1,6 +1,6 @@
 package network.rtcp.type.feedback;
 
-public class rtcpSliceLossIndication extends RtcpFeedback {
+public class RtcpSliceLossIndication extends RtcpFeedback {
 
     /**
      * Slice Loss Indication
