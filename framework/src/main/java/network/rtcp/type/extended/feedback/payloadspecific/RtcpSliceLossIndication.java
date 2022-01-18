@@ -22,8 +22,18 @@ public class RtcpSliceLossIndication extends RtcpFeedback {
      *     0                   1                   2                   3
      *     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     *    |            First        |        Number           | PictureID |
+     *    |0| Payload Type|      MBZ      |             First             |
      *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     *    |            Number             |          PictureId            |
+     *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     *
+     *   0: 1 bit
+     *       MUST be set to '0' upon transmission and MUST be ignored upon
+     *       reception.
+     *
+     *   Payload Type: 7 bits
+     *       This field contains the Payload Type of the RTP packet (i.e.
+     *       the codec) the SLI message refers to.
      *
      *   First: 13 bits
      *       The macroblock (MB) address of the first lost macroblock.  The MB

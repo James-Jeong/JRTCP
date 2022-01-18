@@ -19,6 +19,10 @@ public class RtcpNegativeAck extends RtcpFeedback { // Negative Acknowledgement
      *     |              FSN              |              BLP              |
      *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      *
+     *   Must Be Zero (MBZ): 8 bits
+     *        MUST be set to '0' upon transmission and MUST be ignored upon
+     *        reception.
+     *
      *   First Sequence Number (FSN): 16 bits
      *      Identifies the first sequence number lost.
      *
@@ -29,15 +33,12 @@ public class RtcpNegativeAck extends RtcpFeedback { // Negative Acknowledgement
      *      lost. BLP is set to 0x00001 if the packet corresponding to
      *      the FSN and the following packet have been lost, etc.
      *
-     *
-     *
      */
 
     ////////////////////////////////////////////////////////////
     // VARIABLES
     public static final int MIN_LENGTH = RtcpFeedbackMessageHeader.LENGTH; // bytes
-
-
+    
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
