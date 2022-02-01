@@ -80,7 +80,7 @@ public class RtcpServerHandler extends SimpleChannelInboundHandler<DatagramPacke
 
                     RtcpPacket rtcpPacket = new RtcpPacket(
                             rtcpHeader,
-                            RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData)
+                            RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), rtcpHeader.getResourceCount(), remainData)
                     );
 
                     if (loopCount > 0) {
