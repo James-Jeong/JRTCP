@@ -99,7 +99,7 @@ public class RtcpUnitServerHandler extends SimpleChannelInboundHandler<DatagramP
 
                     RtcpPacket rtcpPacket = new RtcpPacket(
                             rtcpHeader,
-                            RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), remainData)
+                            RtcpPacket.getRtcpFormatByByteData(rtcpHeader.getPacketType(), rtcpHeader.getResourceCount(), remainData)
                     );
 
                     if (loopCount > 0) {

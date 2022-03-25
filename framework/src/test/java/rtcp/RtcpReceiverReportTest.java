@@ -51,7 +51,7 @@ public class RtcpReceiverReportTest {
     }
 
     private void getTest(byte[] data) {
-        RtcpReceiverReport rtcpReceiverReport = new RtcpReceiverReport(data);
+        RtcpReceiverReport rtcpReceiverReport = new RtcpReceiverReport(data, 1);
         logger.debug("[RtcpReceiverReportTest][getTest] ReportBlock: \n{}", rtcpReceiverReport);
     }
 
